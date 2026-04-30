@@ -334,3 +334,14 @@ python src/evaluate.py
 - **Não altere os datasets de avaliação** - apenas os prompts em `prompts/bug_to_user_story_v2.yml`
 - **Itere, itere, itere** - é normal precisar de 3-5 iterações para atingir 0.9 em todas as métricas
 - **Documente seu processo** - a jornada de otimização é tão importante quanto o resultado final
+
+
+## Documentação da execução da tarefa
+1. Técnicas escolhidas: Few shot com dois exemplos de entrada e saída esperada.
+2. Chain of Thought: Decomposição do problema em partes menores e expansão de cada uma. Tal como descrito na descrição da task, isso ajuda a expandir o problema e ajuda a garantir que cada detalhe seja considerado e avaliado.
+    Ao receber o relato de bug, siga estes passos:
+    1. Identifique o papel do usuário afetado
+    2. Entenda qual funcionalidade está falhando e qual o comportamento esperado
+    3. Analise o impacto do bug na experiência do usuário
+    4. Formule a user story, o problema e os critérios de aceitação seguindo o formato acima
+3. Role Prompting — Product owner experiente em criar user stories completas e bem descritas,       
