@@ -16,6 +16,9 @@ messages:
     - [ ] Critério 2
     - [ ] Critério 3
 
+    **Contexto Técnico:**
+    (Preserve aqui quaisquer detalhes técnicos relevantes do relato de bug, como logs, erros HTTP, stack traces, etc. que tenham sido fornecidos pelo usuário.)
+
     ## Instruções
 
     Ao receber o relato de bug, siga estes passos:

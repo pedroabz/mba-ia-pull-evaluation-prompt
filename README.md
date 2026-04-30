@@ -337,11 +337,39 @@ python src/evaluate.py
 
 
 ## Documentação da execução da tarefa
-1. Técnicas escolhidas: Few shot com dois exemplos de entrada e saída esperada.
-2. Chain of Thought: Decomposição do problema em partes menores e expansão de cada uma. Tal como descrito na descrição da task, isso ajuda a expandir o problema e ajuda a garantir que cada detalhe seja considerado e avaliado.
-    Ao receber o relato de bug, siga estes passos:
-    1. Identifique o papel do usuário afetado
-    2. Entenda qual funcionalidade está falhando e qual o comportamento esperado
-    3. Analise o impacto do bug na experiência do usuário
-    4. Formule a user story, o problema e os critérios de aceitação seguindo o formato acima
-3. Role Prompting — Product owner experiente em criar user stories completas e bem descritas,       
+
+### A) Técnicas Aplicadas (Fase 2)
+
+#### i. Few-shot Learning
+
+Foram definidos três exemplos com entrada e saída esperada:
+
+- O primeiro exemplo foi um caso mais vago onde algumas informações era faltantes. A resposta é esperada com suposições geradas pelo agente (enrichment) mas deve manter claro o que são suposições do agente e o que foi relatado no bug recebido.
+- O segundo exemplo foi um relato mais detalhado mas sem entrar em detalhes técnicos. A saída esperada é uma user story bem descrita e sem suposições extras sendo geradas.
+- O terceiro exemplo é um caso em que o relator do bug já fornece algum detalhes técnico sobre o erro. Além de uma resposta contendo os aspectos do segundo exemplo, deve-se ainda ter na user story uma seção com os detalhes técnicos fornecidos.
+
+**Justificativa para o uso:** Ao se fornecer exemplos com a saída esperada, ajuda a se garantir (na medida do possível em um sistema não determinístico) um padrão de saída para os prompts que serão recebidos. Caso contrário, a IA seria mais "criativa" e geraria cada resposta de forma livre.
+
+#### ii. Chain of Thought (CoT)
+
+Decomposição do problema em partes menores e expansão de cada uma. Tal como descrito na descrição da task, isso ajuda a expandir o problema e ajuda a garantir que cada detalhe seja considerado e avaliado. A seguinte etapa do prompt faz isso:
+
+```
+Ao receber o relato de bug, siga estes passos:
+1. Identifique o papel do usuário afetado
+2. Entenda qual funcionalidade está falhando e qual o comportamento esperado
+3. Analise o impacto do bug na experiência do usuário
+4. Formule a user story, o problema e os critérios de aceitação seguindo o formato acima
+```
+
+**Justificativa para o uso:** Faz com que a IA siga um passo-a-passo que foi validado e que sabemos fazer sentido no contexto em que estamos trabalhando. Isso gera mais previsibilidade e também ajuda a assegurar um nível de qualidade superior.
+
+#### iii. Role Prompting
+
+O prompt faz com o agente assuma ser um Product owner experiente em criar user stories completas e bem descritas.
+```
+Você é um Product Owner experiente, especializado em traduzir relatos de bugs de usuários em user stories claras e acionáveis para equipes de desenvolvimento.
+```
+
+
+**Justificativa para o uso:** Faz com que o modelo pense na perspectiva de alguém com uma certa especialidade e metodologia de trabalho. Um dev junior teria uma forma de analisar um problema totalmente diferente de um arquiteto que por sua vez também pensa diferente de um P.O., orientado a trabalhar com a visão de negócio e do ponto de vista do impacto no usuário.
