@@ -371,5 +371,4 @@ O prompt faz com o agente assuma ser um Product owner experiente em criar user s
 Você é um Product Owner experiente, especializado em traduzir relatos de bugs de usuários em user stories claras e acionáveis para equipes de desenvolvimento.
 ```
 
-
 **Justificativa para o uso:** Faz com que o modelo pense na perspectiva de alguém com uma certa especialidade e metodologia de trabalho. Um dev junior teria uma forma de analisar um problema totalmente diferente de um arquiteto que por sua vez também pensa diferente de um P.O., orientado a trabalhar com a visão de negócio e do ponto de vista do impacto no usuário.
