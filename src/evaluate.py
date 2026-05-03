@@ -196,6 +196,7 @@ def evaluate_prompt(
         f1_scores = []
         clarity_scores = []
         precision_scores = []
+        detailed_results = []
 
         print("   Avaliando exemplos...")
 
@@ -211,7 +212,55 @@ def evaluate_prompt(
                 clarity_scores.append(clarity["score"])
                 precision_scores.append(precision["score"])
 
+                detailed_results.append({
+                    "example": i,
+                    "bug_report": result["question"],
+                    "generated": result["answer"],
+                    "reference": result["reference"],
+                    "scores": {
+                        "f1": f1["score"],
+                        "f1_precision": f1.get("precision", None),
+                        "f1_recall": f1.get("recall", None),
+                        "f1_reasoning": f1.get("reasoning", ""),
+                        "clarity": clarity["score"],
+                        "clarity_reasoning": clarity.get("reasoning", ""),
+                        "precision": precision["score"],
+                        "precision_reasoning": precision.get("reasoning", ""),
+                    }
+                })
+
                 print(f"      [{i}/{len(examples)}] F1:{f1['score']:.2f} Clarity:{clarity['score']:.2f} Precision:{precision['score']:.2f}")
+
+        # Salvar resultados detalhados em arquivos
+        output_dir = Path("evaluation_results")
+        output_dir.mkdir(exist_ok=True)
+
+        # Arquivo de log com reasoning do juiz
+        log_path = output_dir / "evaluation_log.txt"
+        with open(log_path, "w", encoding="utf-8") as f:
+            for r in detailed_results:
+                f.write(f"{'=' * 80}\n")
+                f.write(f"EXEMPLO {r['example']}\n")
+                f.write(f"{'=' * 80}\n\n")
+                f.write(f"BUG REPORT:\n{r['bug_report']}\n\n")
+                f.write(f"--- GERADO ---\n{r['generated']}\n\n")
+                f.write(f"--- REFERÊNCIA ---\n{r['reference']}\n\n")
+                f.write(f"--- SCORES ---\n")
+                f.write(f"F1: {r['scores']['f1']:.2f} (Precision: {r['scores']['f1_precision']}, Recall: {r['scores']['f1_recall']})\n")
+                f.write(f"  Reasoning: {r['scores']['f1_reasoning']}\n")
+                f.write(f"Clarity: {r['scores']['clarity']:.2f}\n")
+                f.write(f"  Reasoning: {r['scores']['clarity_reasoning']}\n")
+                f.write(f"Precision: {r['scores']['precision']:.2f}\n")
+                f.write(f"  Reasoning: {r['scores']['precision_reasoning']}\n\n")
+
+        # Arquivo JSON para análise programática
+        json_path = output_dir / "evaluation_results.json"
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(detailed_results, f, ensure_ascii=False, indent=2)
+
+        print(f"\n   Resultados salvos em:")
+        print(f"      {log_path}")
+        print(f"      {json_path}")
 
         avg_f1 = sum(f1_scores) / len(f1_scores) if f1_scores else 0.0
         avg_clarity = sum(clarity_scores) / len(clarity_scores) if clarity_scores else 0.0
