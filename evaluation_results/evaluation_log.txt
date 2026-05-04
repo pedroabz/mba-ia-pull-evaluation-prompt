@@ -80,102 +80,80 @@ IMPACTO:
 - Time de vendas perdeu R$ 200k em oportunidades por dados perdidos
 
 --- GERADO ---
-=== USER STORY PRINCIPAL 1: CONFLITO DE DADOS ===
+=== USER STORY PRINCIPAL ===
 
-Como um vendedor em campo, eu quero que as edições de tarefas feitas offline sejam mescladas corretamente ao sincronizar, para que eu não perca informações importantes quando outros usuários também editam a mesma tarefa.
+Como um vendedor em campo, eu quero que o app de produtividade sincronize dados de forma confiável e eficiente, para que eu possa gerenciar minhas tarefas e compromissos sem perder informações importantes, mesmo quando estou offline.
 
 === CRITÉRIOS DE ACEITAÇÃO ===
 
-- Dado que dois usuários editam a mesma tarefa enquanto estão offline
+**Conflito de Dados:**
+- Dado que dois usuários editam a mesma tarefa offline
 - Quando ambos sincronizam suas alterações
 - Então o sistema deve detectar o conflito de dados
 - E deve notificar ambos os usuários sobre o conflito
-- E deve permitir que os usuários escolham qual versão manter ou mesclar manualmente
+- E deve permitir que os usuários escolham qual versão manter ou mesclar as alterações
 
-=== CONTEXTO TÉCNICO ===
+**Sincronização de Anexos:**
+- Dado que um usuário anexa um arquivo grande a uma tarefa
+- Quando a conexão é interrompida durante o upload
+- Então o upload deve retomar do ponto de interrupção
+- E o usuário deve ser notificado sobre o status do upload
+- E se o upload falhar após várias tentativas, o usuário deve ser informado e o status não deve ser marcado como sincronizado
 
-- Problema atual: "last write wins" causa perda de dados
-- Sugestão: Implementar um mecanismo de detecção de conflitos que notifique os usuários e ofereça opções de resolução
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-- Implementar detecção de conflitos baseada em timestamps ou versões de edição
-- Criar interface de usuário para resolução de conflitos
-- Testar cenários de conflito com múltiplos usuários
-
----
-
-=== USER STORY PRINCIPAL 2: SINCRONIZAÇÃO DE ANEXOS ===
-
-Como um vendedor em campo, eu quero que o upload de anexos grandes seja retomado de onde parou após uma interrupção, para que eu não precise reiniciar o upload do zero e perca tempo e dados.
-
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- Dado que um usuário está fazendo upload de um anexo grande
-- Quando a conexão é perdida durante o upload
-- Então o upload deve ser retomado do ponto de interrupção quando a conexão for restabelecida
-- E o usuário deve ser notificado se o upload falhar após múltiplas tentativas
-
-=== CONTEXTO TÉCNICO ===
-
-- Problema atual: Upload reinicia do zero após perda de conexão
-- Logs indicam falha após 5 tentativas sem notificação ao usuário
-- Sugestão: Implementar upload com suporte a retomada (resumable upload)
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-- Implementar protocolo de upload que suporte retomada (ex: multipart upload)
-- Adicionar notificações de falha de upload para o usuário
-- Testar uploads em condições de rede instáveis
-
----
-
-=== USER STORY PRINCIPAL 3: ORDENAÇÃO DE OPERAÇÕES ===
-
-Como um vendedor em campo, eu quero que as operações offline sejam aplicadas na ordem correta ao sincronizar, para que o estado final dos meus dados seja consistente com as minhas ações.
-
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
+**Ordenação de Operações:**
 - Dado que um usuário realiza múltiplas operações offline
-- Quando o dispositivo se reconecta e sincroniza
-- Então as operações devem ser aplicadas no servidor na ordem correta
-- E o estado final deve refletir todas as operações na sequência correta
-
-=== CONTEXTO TÉCNICO ===
-
-- Problema atual: Operações aplicadas fora de ordem no servidor
-- Sugestão: Utilizar timestamps ou um log sequencial para garantir a ordem correta
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-- Implementar sistema de ordenação de operações baseado em timestamps
-- Garantir que o servidor respeite a ordem de operações recebidas
-- Testar sincronização com múltiplas operações em diferentes ordens
-
----
-
-=== USER STORY PRINCIPAL 4: GERENCIAMENTO DE MEMÓRIA ===
-
-Como um vendedor em campo, eu quero que o app sincronize eficientemente grandes volumes de dados sem travar, para que eu possa continuar usando o app sem interrupções.
-
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- Dado que um usuário tem 1000+ operações pendentes para sincronizar
 - Quando o dispositivo se reconecta e inicia a sincronização
-- Então o app deve gerenciar a memória eficientemente para evitar crashes
-- E deve sincronizar os dados em lotes para minimizar o uso de memória
+- Então as operações devem ser aplicadas no servidor na ordem correta
+- E o timestamp client-side deve ser respeitado para garantir a sequência correta
+
+**Sincronização de Alto Volume:**
+- Dado que um usuário tem um grande número de operações pendentes
+- Quando o app tenta sincronizar após um longo período offline
+- Então o app deve sincronizar em lotes para evitar sobrecarga de memória
+- E deve monitorar o uso de memória para evitar crashes
+- E o usuário deve ser informado sobre o progresso da sincronização
 
 === CONTEXTO TÉCNICO ===
 
-- Problema atual: App crasha ao sincronizar 1000+ itens devido a uso excessivo de memória
-- Memória medida: 850MB (acima do limite de 700MB no iOS)
-- Sugestão: Implementar sincronização em lotes e otimização de uso de memória
+**Conflito de Dados:**
+- Problema atual: "last write wins" causa perda de dados
+- Solução sugerida: Implementar detecção de conflitos e resolução manual ou automática
+
+**Sincronização de Anexos:**
+- Problema atual: Uploads não retomam do ponto de interrupção
+- Solução sugerida: Implementar upload com suporte a retomada (resumable uploads)
+
+**Ordenação de Operações:**
+- Problema atual: Operações aplicadas fora de ordem devido à falta de respeito ao timestamp
+- Solução sugerida: Utilizar timestamps para ordenar operações no servidor
+
+**Sincronização de Alto Volume:**
+- Problema atual: Carregamento de todos os itens na memória causa crashes
+- Solução sugerida: Sincronizar em lotes menores e otimizar uso de memória
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
-- Implementar sincronização em lotes para reduzir o uso de memória
-- Otimizar o gerenciamento de memória durante a sincronização
-- Testar sincronização com grandes volumes de dados em dispositivos com diferentes capacidades de memória
+1. **Detecção e Resolução de Conflitos:**
+   - Implementar lógica de detecção de conflitos no cliente e servidor
+   - Criar interface para resolução de conflitos no app
+
+2. **Upload com Retomada:**
+   - Utilizar bibliotecas de upload que suportem retomada (ex: tus.io)
+   - Implementar feedback de progresso e falhas para o usuário
+
+3. **Ordenação de Operações:**
+   - Adicionar suporte a timestamps em operações offline
+   - Garantir que o servidor respeite a ordem dos timestamps ao aplicar operações
+
+4. **Sincronização em Lotes:**
+   - Dividir operações pendentes em lotes menores para sincronização
+   - Monitorar e otimizar uso de memória durante a sincronização
+
+5. **Monitoramento de Memória:**
+   - Implementar monitoramento de uso de memória durante operações intensivas
+   - Ajustar limites de memória para evitar crashes em dispositivos móveis
+
+Essas melhorias visam garantir que o app de produtividade ofereça uma experiência confiável e eficiente para os vendedores em campo, minimizando a perda de dados e melhorando a satisfação do usuário.
 
 --- REFERÊNCIA ---
 Como um vendedor usando o app em campo, eu quero que minhas alterações offline sejam sincronizadas de forma confiável sem perda de dados, para que eu possa trabalhar com tranquilidade mesmo em áreas sem conexão.
@@ -342,11 +320,11 @@ Antes vs Depois:
 
 --- SCORES ---
 F1: 0.87 (Precision: 0.9, Recall: 0.85)
-  Reasoning: A resposta gerada cobre corretamente os principais problemas e soluções, como conflitos de dados, upload resiliente, ordenação de operações e gerenciamento de memória. No entanto, faltam detalhes técnicos específicos, como o uso de CRDTs ou Vector Clocks para resolução de conflitos e o protocolo de upload chunked. A resposta também não menciona explicitamente a necessidade de um sistema de logs de operações com timestamps. Apesar disso, a maioria das informações relevantes está presente e correta, resultando em alta precisão e recall.
+  Reasoning: A resposta gerada cobre a maioria dos aspectos da resposta esperada, incluindo a necessidade de sincronização confiável, resolução de conflitos, upload resiliente, ordenação correta e sincronização em lotes. No entanto, faltam detalhes técnicos específicos, como o uso de CRDTs ou Vector Clocks para resolução de conflitos e o protocolo detalhado para uploads com checkpoints. A precisão é alta, pois as informações fornecidas são corretas e relevantes, mas a ausência de alguns detalhes técnicos reduz o recall.
 Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com uma estrutura clara que divide as user stories, critérios de aceitação, contexto técnico e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades significativas, e as instruções são precisas. A resposta é concisa, cobrindo todos os pontos necessários sem redundâncias. No entanto, a quantidade de detalhes técnicos pode ser um pouco densa para leitores menos experientes, o que ligeiramente afeta a clareza geral para um público mais amplo.
+  Reasoning: A resposta é bem organizada, com uma estrutura lógica que facilita a compreensão. A linguagem é clara e direta, evitando jargões desnecessários, o que a torna fácil de entender. Não há ambiguidades, pois a resposta detalha claramente os problemas e as soluções propostas. No entanto, a resposta poderia ser um pouco mais concisa, já que algumas seções são extensas e poderiam ser resumidas sem perder informações essenciais. No geral, a resposta é clara e eficaz na comunicação das ideias principais.
 Precision: 0.90
-  Reasoning: A resposta gerada é precisa e aborda diretamente os problemas relatados, oferecendo soluções técnicas detalhadas e user stories relevantes. Não há alucinações, pois todas as informações são baseadas no contexto fornecido. A resposta mantém o foco na pergunta, abordando cada problema específico de sincronização e perda de dados. A correção factual é alta, pois as soluções propostas, como CRDTs e uploads resumíveis, são tecnicamente viáveis e relevantes. No entanto, a resposta poderia ser mais concisa, evitando detalhes excessivos que não foram solicitados, como a arquitetura do app e sugestões de GraphQL.
+  Reasoning: A resposta gerada é precisa e aborda os problemas relatados no contexto, oferecendo soluções técnicas detalhadas para cada um. Não há alucinações, pois todas as informações são baseadas em práticas comuns de desenvolvimento de software. A resposta está focada na pergunta, abordando diretamente os problemas de sincronização e perda de dados. A correção factual é alta, pois as soluções propostas, como CRDTs e uploads com retomada, são tecnicamente viáveis. No entanto, a resposta poderia ser mais concisa, evitando detalhes excessivos que não foram solicitados, como a arquitetura do app e sugestões de GraphQL.
 
 ================================================================================
 EXEMPLO 2
@@ -406,75 +384,75 @@ IMPACTO BUSINESS:
 --- GERADO ---
 === USER STORY PRINCIPAL ===
 
-Como um administrador visualizando o dashboard executivo, eu quero que os relatórios carreguem rapidamente e apresentem dados consistentes, para que eu possa tomar decisões informadas e confiáveis sem atrasos.
+Como um administrador de sistema SaaS B2B, eu quero que o dashboard executivo e relatórios financeiros sejam precisos e rápidos, para que eu possa tomar decisões informadas e manter a confiança dos clientes.
 
 === CRITÉRIOS DE ACEITAÇÃO ===
 
 **Performance do Dashboard Executivo:**
-- Dado que estou acessando o dashboard executivo
-- Quando solicito o relatório
+- Dado que um cliente acessa o dashboard executivo
+- Quando o sistema processa as métricas para múltiplos departamentos
 - Então o tempo de resposta deve ser inferior a 3 segundos
-- E o uso de CPU do banco de dados não deve exceder 70% em horário de pico
+- E a carga da CPU do banco de dados não deve exceder 70% em horário de pico
 
-**Consistência do Cálculo de MRR:**
-- Dado que estou visualizando o MRR no dashboard
-- Quando comparo com o relatório financeiro e a planilha contábil
-- Então os valores devem ser consistentes e baseados na mesma lógica de cálculo
-- E devem considerar assinaturas ativas, cancelamentos e ajustes pró-rata de forma uniforme
+**Cálculo Consistente de MRR:**
+- Dado que o MRR é exibido no dashboard, relatório financeiro e planilha contábil
+- Quando o cálculo é realizado
+- Então todas as fontes devem apresentar o mesmo valor de MRR
+- E o cálculo deve considerar cancelamentos, assinaturas ativas e pró-rata de upgrades/downgrades de forma consistente
 
-**Atualização do Cache:**
+**Atualização de Cache:**
 - Dado que um cliente faz upgrade de plano
-- Quando visualizo o dashboard
+- Quando o dashboard é acessado
 - Então o plano atualizado deve ser refletido imediatamente
-- E a invalidação do cache deve ocorrer automaticamente e corretamente
+- E o cache deve ser invalidado corretamente sem intervenção manual
 
 **Exportação de CSV:**
-- Dado que estou exportando um relatório anual
-- Quando inicio a exportação
-- Então o processo não deve travar o servidor
-- E o uso de CPU não deve exceder 80%
+- Dado que um cliente solicita a exportação de um relatório anual
+- Quando o processo de exportação é iniciado
+- Então o uso de CPU não deve exceder 80%
 - E a memória utilizada não deve ultrapassar 2GB
+- E o processo não deve impactar a performance de outras requisições
 
-=== CONTEXTO DO BUG ===
+=== CONTEXTO TÉCNICO ===
 
-**Performance:**
-- Problema: Query N+1 no endpoint GET /api/reports/executive-dashboard
-- Impacto: 101 queries para 1 cliente com 100 departamentos
-- Tempo de resposta atual: 45 segundos
-- SLA: 3 segundos
+**Performance - Query N+1:**
+- Problema: Uso de queries N+1 no endpoint GET /api/reports/executive-dashboard
+- Stack trace indica múltiplas queries para cada empresa
+- Solução sugerida: Implementar queries otimizadas com joins ou subqueries para reduzir o número de chamadas ao banco de dados
 
-**Cálculo de MRR:**
-- Discrepâncias entre dashboard, relatório financeiro e planilha contábil
-- Causas: Diferentes considerações de cancelamentos, assinaturas ativas e ajustes pró-rata
+**Lógica de Negócio - Cálculo de MRR:**
+- Problema: Inconsistência nos cálculos de MRR entre diferentes fontes
+- Solução sugerida: Unificar a lógica de cálculo de MRR em um único serviço que todas as partes do sistema utilizem
 
-**Cache:**
-- TTL do cache Redis: 24 horas
-- Problema: Dados desatualizados por até 24h após upgrade de plano
+**Cache - Redis:**
+- Problema: Cache desatualizado com TTL de 24 horas
+- Solução sugerida: Implementar invalidação automática de cache ao detectar mudanças críticas, como upgrades de plano
 
-**Concorrência:**
-- Exportação de CSV causa alta carga de CPU e uso excessivo de memória
-- Impacto: Outras requisições ficam lentas, OOM Kill ocorre
+**Concorrência - Exportação de CSV:**
+- Problema: Exportação de CSV causa alta carga de CPU e uso excessivo de memória
+- Solução sugerida: Implementar processamento em lote e streaming para reduzir o uso de recursos durante a exportação
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
-**Performance:**
-- Refatorar para usar queries otimizadas com joins em vez de N+1
-- Considerar uso de técnicas de agregação e pré-cálculo de métricas
+1. **Otimização de Queries:**
+   - Refatorar o endpoint GET /api/reports/executive-dashboard para usar joins
+   - Testar performance com diferentes volumes de dados
 
-**Consistência do Cálculo de MRR:**
-- Unificar lógica de cálculo de MRR entre dashboard, relatório financeiro e planilha contábil
-- Implementar testes automatizados para garantir consistência
+2. **Unificação do Cálculo de MRR:**
+   - Desenvolver um serviço centralizado para cálculo de MRR
+   - Atualizar todas as partes do sistema para usar este serviço
 
-**Cache:**
-- Implementar invalidação de cache baseada em eventos (ex: upgrade de plano)
-- Reduzir TTL do cache ou usar cache de nível mais granular
+3. **Melhoria no Cache:**
+   - Implementar lógica de invalidação de cache baseada em eventos
+   - Reduzir TTL do cache para 1 hora e testar impacto
 
-**Concorrência:**
-- Implementar processamento assíncrono para exportação de CSV
-- Otimizar uso de memória durante a exportação
-- Considerar paginar a exportação ou usar streaming de dados
+4. **Exportação de CSV:**
+   - Implementar processamento em lote para exportação de dados
+   - Utilizar streaming para geração de arquivos CSV grandes
 
-Essas ações visam resolver os problemas de performance, consistência de dados, atualização de cache e concorrência, garantindo que o sistema de relatórios gerenciais funcione de forma eficiente e confiável.
+5. **Monitoramento e Alertas:**
+   - Configurar monitoramento para uso de CPU e memória
+   - Implementar alertas para quando limites críticos forem atingidos
 
 --- REFERÊNCIA ---
 Como um executivo usando o sistema de relatórios, eu quero visualizar métricas precisas e atualizadas em tempo hábil, para que eu possa tomar decisões estratégicas baseadas em dados confiáveis.
@@ -601,11 +579,11 @@ Sprint 3 - Scale & Monitor (1 semana):
 
 --- SCORES ---
 F1: 0.75 (Precision: 0.8, Recall: 0.7)
-  Reasoning: A resposta gerada cobre corretamente os principais problemas de performance, consistência de dados, atualização de cache e concorrência, alinhando-se bem com a resposta esperada. No entanto, a precisão é penalizada por algumas informações desnecessárias e ligeiramente diferentes, como a descrição do impacto do bug. O recall é afetado pela omissão de detalhes específicos, como a necessidade de documentar a fórmula MRR e a implementação de testes unitários, que são mencionados na resposta esperada.
-Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com uma estrutura clara que separa user stories, critérios de aceitação e tarefas técnicas. A linguagem é direta e acessível, evitando jargões desnecessários, o que facilita a compreensão. Não há ambiguidades significativas, e as informações são apresentadas de forma clara e precisa. A resposta é concisa, cobrindo todos os pontos importantes sem redundâncias. No entanto, poderia ser ligeiramente mais breve em algumas seções, especialmente nas tarefas técnicas, para melhorar ainda mais a concisão.
+  Reasoning: A resposta gerada cobre corretamente os principais problemas técnicos e soluções sugeridas, como otimização de queries e unificação do cálculo de MRR. No entanto, omite detalhes importantes dos critérios de aceitação, como a necessidade de notificações para exportações e a especificação de cache para dados críticos. A precisão é alta, pois as informações fornecidas são relevantes e corretas, mas a recall é menor devido à ausência de alguns critérios específicos mencionados na resposta esperada.
+Clarity: 0.95
+  Reasoning: A resposta é bem organizada, com uma estrutura clara que separa user stories, critérios de aceitação, contexto técnico e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão, e evita jargões desnecessários. A ausência de ambiguidade é notável, pois a resposta é clara e específica sobre as ações necessárias. A concisão é mantida, com informações relevantes e sem redundâncias. No entanto, poderia haver uma ligeira melhoria na concisão ao reduzir detalhes técnicos excessivos que podem ser documentados separadamente, mas isso não compromete significativamente a clareza geral.
 Precision: 0.90
-  Reasoning: A resposta gerada é precisa e aborda diretamente os problemas apresentados, sem alucinações. Ela fornece soluções técnicas específicas e relevantes para cada problema identificado, como otimização de queries e estratégias de cache. No entanto, a resposta poderia ser mais concisa em algumas partes, como na descrição dos critérios técnicos, que são detalhados além do necessário para a pergunta. Todas as informações são factualmente corretas e baseadas no contexto fornecido, resultando em um score alto, mas não perfeito devido à extensão desnecessária em algumas seções.
+  Reasoning: A resposta gerada é precisa e aborda diretamente os problemas apresentados, sem alucinações. As soluções propostas são técnicas e relevantes, como otimização de queries e centralização do cálculo de MRR. No entanto, a resposta poderia ser mais concisa, evitando detalhes excessivos que não foram solicitados, como exemplos de queries SQL. Todas as informações são factualmente corretas e baseadas no contexto fornecido, mas a inclusão de detalhes técnicos não essenciais reduz ligeiramente o foco na pergunta principal.
 
 ================================================================================
 EXEMPLO 3
@@ -643,72 +621,81 @@ IMPACTO:
 - Rating do app caiu de 4.5 para 3.2 estrelas
 
 --- GERADO ---
-=== USER STORY PRINCIPAL 1: SEGURANÇA - XSS NO CAMPO DE CUPOM ===
+=== USER STORY PRINCIPAL ===
 
-Como um cliente utilizando o sistema de checkout, eu quero inserir cupons de desconto de forma segura, para que eu possa aplicar descontos sem comprometer a segurança dos meus dados.
+Como um cliente utilizando o sistema de checkout, eu quero que o processo de pagamento seja seguro, confiável e claro, para que eu possa completar minhas compras sem preocupações com segurança, falhas de pagamento ou incertezas sobre o status do pedido.
 
-Critérios de Aceitação:
-- Dado que estou na página de checkout
-- Quando insiro um cupom de desconto
-- Então o sistema deve sanitizar a entrada para prevenir execução de scripts
-- E deve rejeitar entradas que contenham scripts maliciosos
-- E deve exibir uma mensagem de erro clara se o cupom for inválido
+=== CRITÉRIOS DE ACEITAÇÃO ===
 
-Contexto Técnico:
-- Problema identificado: Falta de sanitização no campo de cupom
-- Sugestão: Implementar sanitização de entrada usando uma biblioteca de segurança como DOMPurify
+**Segurança:**
+- Dado que estou inserindo um cupom de desconto
+- Quando insiro um valor no campo de cupom
+- Então o sistema deve sanitizar a entrada para prevenir XSS
+- E deve rejeitar qualquer script ou código malicioso
 
-=== USER STORY PRINCIPAL 2: INTEGRAÇÃO - ERRO NO GATEWAY DE PAGAMENTO ===
-
-Como um cliente realizando um pagamento, eu quero que o processo de pagamento seja confiável, para que eu possa completar minha compra sem erros ou cobranças duplicadas.
-
-Critérios de Aceitação:
+**Integração:**
 - Dado que estou processando um pagamento
-- Quando o gateway de pagamento retorna um erro
-- Então o sistema deve tentar novamente até 3 vezes antes de falhar
-- E deve exibir uma mensagem clara ao usuário se o pagamento falhar
-- E não deve criar um pedido se o pagamento não for confirmado
+- Quando o sistema envia uma requisição para o gateway de pagamento
+- Então a requisição deve ser processada sem erros de timeout
+- E o pedido deve ser criado apenas após confirmação do pagamento
+- E o cliente deve receber uma confirmação clara do status do pedido
 
-Contexto Técnico:
-- Problema identificado: Erro 504 Gateway Timeout e "Connection pool exhausted" no Postgres
-- Sugestão: Revisar configuração do pool de conexões e implementar retries com backoff exponencial
-
-=== USER STORY PRINCIPAL 3: LÓGICA DE NEGÓCIO - RACE CONDITION EM CUPONS ===
-
-Como um administrador do sistema, eu quero garantir que os cupons de desconto sejam aplicados corretamente, para que o limite de uso seja respeitado e a empresa não tenha prejuízos.
-
-Critérios de Aceitação:
-- Dado que um cupom de desconto tem um limite de uso
-- Quando múltiplos usuários tentam aplicar o cupom simultaneamente
-- Então o sistema deve garantir que o limite de uso não seja excedido
+**Lógica de Negócio:**
+- Dado que um cupom de desconto tem um limite de usos
+- Quando múltiplos clientes tentam usar o cupom simultaneamente
+- Então o sistema deve garantir que o limite de usos não seja excedido
 - E deve rejeitar tentativas adicionais após atingir o limite
 
-Contexto Técnico:
-- Problema identificado: Verificação de limite não é atômica
-- Sugestão: Implementar transações atômicas ou locks para garantir consistência
-
-=== USER STORY PRINCIPAL 4: UX - LOADING INFINITO APÓS TIMEOUT ===
-
-Como um cliente aguardando a confirmação do pagamento, eu quero receber feedback claro sobre o status do meu pagamento, para que eu saiba se devo tentar novamente ou esperar.
-
-Critérios de Aceitação:
+**UX:**
 - Dado que estou aguardando a confirmação do pagamento
 - Quando o processamento demora mais de 30 segundos
-- Então o sistema deve exibir uma mensagem informando sobre o atraso
-- E deve permitir que o usuário cancele ou tente novamente
-- E deve parar o spinner após 30 segundos
+- Então o sistema deve informar o usuário sobre o atraso
+- E deve oferecer a opção de tentar novamente ou cancelar
+- E deve evitar que a tela fique em loading infinito
 
-Contexto Técnico:
-- Problema identificado: Tela com spinner infinito após timeout
-- Sugestão: Implementar timeout com feedback ao usuário e opções de ação
+=== CONTEXTO TÉCNICO ===
+
+**Segurança:**
+- Problema: Falta de sanitização no campo de cupom permite XSS
+- Solução: Implementar sanitização de entrada para todos os campos de texto
+
+**Integração:**
+- Problema: Erro 504 Gateway Timeout frequente no endpoint de pagamento
+- Logs indicam "Connection pool exhausted" no Postgres
+- Solução: Revisar configuração do pool de conexões e otimizar chamadas ao banco de dados
+
+**Lógica de Negócio:**
+- Problema: Race condition na verificação de limite de uso de cupons
+- Solução: Implementar transações atômicas para garantir consistência
+
+**UX:**
+- Problema: Tela de loading infinito após timeout de pagamento
+- Solução: Implementar timeout com feedback ao usuário e opções de ação
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
-1. Implementar sanitização de entrada no campo de cupom.
-2. Revisar e ajustar configuração do pool de conexões do Postgres.
-3. Implementar retries com backoff exponencial para chamadas ao gateway de pagamento.
-4. Garantir atomicidade na verificação de limite de uso de cupons.
-5. Adicionar timeout e feedback ao usuário no processo de pagamento.
+1. **Segurança:**
+   - Implementar biblioteca de sanitização de entrada (ex: DOMPurify)
+   - Adicionar testes de segurança para inputs de usuário
+
+2. **Integração:**
+   - Revisar e ajustar configuração do pool de conexões do Postgres
+   - Implementar retries e fallback para chamadas ao gateway de pagamento
+
+3. **Lógica de Negócio:**
+   - Refatorar lógica de aplicação de cupons para usar transações atômicas
+   - Adicionar logs detalhados para monitorar uso de cupons
+
+4. **UX:**
+   - Implementar feedback visual e opções de ação após timeout
+   - Adicionar logs para monitorar tempos de resposta do gateway
+
+=== IMPACTO ===
+
+- 150+ clientes afetados na última semana
+- Perda estimada: R$ 15.000 em cupons indevidos
+- 45 tickets de suporte abertos
+- Rating do app caiu de 4.5 para 3.2 estrelas
 
 --- REFERÊNCIA ---
 Como um cliente finalizando minha compra, eu quero um processo de checkout seguro, confiável e com feedback claro, para que eu possa completar minhas compras sem preocupações ou frustrações.
@@ -806,11 +793,11 @@ Múltiplos Componentes Afetados:
 
 --- SCORES ---
 F1: 0.87 (Precision: 0.9, Recall: 0.85)
-  Reasoning: A resposta gerada cobre a maioria dos aspectos da resposta esperada, incluindo segurança, integração, lógica de negócio e UX. No entanto, a resposta gerada omite alguns detalhes técnicos, como o uso de 'Content Security Policy headers' e 'idempotency key'. Além disso, a resposta gerada inclui uma user story para um administrador, que não estava presente na resposta esperada, o que reduz a precisão. No geral, a resposta é bastante completa e relevante, mas poderia ser mais precisa ao incluir todos os detalhes técnicos mencionados na resposta esperada.
+  Reasoning: A resposta gerada cobre a maioria dos aspectos da resposta esperada, incluindo segurança, integração, lógica de negócios e UX. A precisão é alta, pois as informações fornecidas são corretas e relevantes, mas há uma pequena redundância em algumas descrições. O recall é ligeiramente menor, pois faltam detalhes específicos, como o uso de 'lock otimista/pessimista' para controle de cupons e a menção de 'Content Security Policy headers'. No geral, a resposta é bem alinhada com a esperada, mas poderia ser mais detalhada em alguns pontos técnicos.
 Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com uma estrutura lógica que facilita a compreensão (1.0). A linguagem é clara e direta, evitando jargões desnecessários, o que a torna fácil de entender (1.0). Não há ambiguidades significativas, e as instruções são precisas e específicas (1.0). No entanto, a resposta é um pouco extensa, com algumas repetições de informações, o que afeta a concisão (0.7). No geral, a resposta é clara e eficaz, mas poderia ser ligeiramente mais concisa para melhorar ainda mais a clareza.
+  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto técnico e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois cada problema e solução são descritos de forma precisa. A concisão é mantida, com informações relevantes e sem redundâncias. No entanto, a resposta poderia ser ligeiramente mais concisa em algumas seções, como nos detalhes técnicos, para melhorar ainda mais a clareza geral.
 Precision: 1.00
-  Reasoning: A resposta gerada é precisa e aborda todos os problemas identificados na pergunta do usuário. Não há alucinações, pois todas as informações são baseadas em fatos e correspondem aos problemas descritos. A resposta está focada na pergunta, abordando cada falha crítica com user stories e critérios de aceitação relevantes. Além disso, as informações são factualmente corretas, oferecendo soluções técnicas adequadas para cada problema, como sanitização de entrada, ajustes no pool de conexões e controle atômico de cupons. A resposta é completa e diretamente relacionada aos problemas apresentados.
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações são baseadas nos problemas identificados e nas soluções técnicas sugeridas. A resposta está focada na pergunta, abordando diretamente os problemas de segurança, integração, lógica de negócio e UX mencionados. Além disso, as informações são factualmente corretas, refletindo práticas recomendadas para resolver os problemas descritos, como sanitização de entrada, ajustes no pool de conexões e implementação de transações atômicas. Não há desvios ou informações irrelevantes, garantindo um score perfeito em todos os critérios.
 
 ================================================================================
 EXEMPLO 4
@@ -826,37 +813,25 @@ Detalhes:
 - Precisam fechar o menu lateral antes
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um usuário em dispositivo móvel, eu quero que modais importantes apareçam acima de todos os outros elementos, para que eu possa interagir com eles sem precisar fechar outros componentes.
 
-Como um usuário em dispositivos móveis, eu quero que o modal de confirmação de exclusão apareça visível e acessível, para que eu possa confirmar ou cancelar a exclusão sem precisar fechar o menu lateral.
+Critérios de Aceitação:
+- Dado que estou em uma tela com largura menor que 768px
+- Quando aciono uma ação que abre um modal de confirmação
+- Então o modal deve aparecer acima de todos os elementos da página
+- E o menu lateral deve ficar desfocado (backdrop)
+- E todos os botões do modal devem ser clicáveis
+- E o modal deve ocupar pelo menos 90% da largura da tela
 
-=== CRITÉRIOS DE ACEITAÇÃO ===
+Critérios de Acessibilidade:
+- O foco do teclado deve ir para o modal
+- Deve ser possível fechar com ESC
+- O backdrop deve fechar ao clicar fora
 
-- **Cenário Principal: Modal de Confirmação**
-  - Dado que estou em uma tela pequena (< 768px) com o menu lateral aberto
-  - Quando aciono a ação que dispara o modal de confirmação de exclusão
-  - Então o modal deve aparecer acima do menu lateral
-  - E o modal deve ser totalmente visível e interativo
-  - E eu devo conseguir clicar nos botões do modal sem fechar o menu lateral
-
-- **Cenário Complementar: Feedback Visual**
-  - Dado que o modal está visível
-  - Quando o modal é exibido
-  - Então o fundo deve ter um overlay escurecido para indicar foco no modal
-  - E o menu lateral deve permanecer acessível, mas não interativo enquanto o modal estiver aberto
-
-=== CONTEXTO TÉCNICO ===
-
-- Problema identificado: z-index do modal (1000) é menor que o z-index do menu lateral (1050)
-- Impacto: Modal aparece atrás do menu lateral, tornando-o inacessível
-- Sugestão de solução: Aumentar o z-index do modal para um valor maior que o do menu lateral (ex: 1100)
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-1. Atualizar o CSS para aumentar o z-index do modal de confirmação de exclusão para 1100.
-2. Testar a exibição do modal em dispositivos com diferentes tamanhos de tela para garantir que o modal esteja sempre visível e interativo.
-3. Verificar a consistência do overlay escurecido ao abrir o modal, garantindo que o foco visual esteja no modal.
-4. Validar que o menu lateral não interfere na interação com o modal enquanto este estiver aberto.
+Contexto Técnico:
+- Bug atual: z-index modal (1000) < z-index menu (1050)
+- Solução: ajustar z-index do modal para > 1050
+- Devices afetados: mobile e tablets (< 768px)
 
 --- REFERÊNCIA ---
 Como um usuário em dispositivo móvel, eu quero que modais importantes apareçam acima de todos os outros elementos, para que eu possa interagir com eles sem precisar fechar outros componentes.
@@ -880,12 +855,12 @@ Contexto Técnico:
 - Devices afetados: mobile e tablets (< 768px)
 
 --- SCORES ---
-F1: 0.75 (Precision: 0.8, Recall: 0.7)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a necessidade do modal estar acima do menu e ser interativo. No entanto, omite detalhes importantes como a necessidade do modal ocupar 90% da largura da tela e o foco do teclado. A precisão é alta, pois as informações fornecidas são corretas e relevantes, mas a ausência de alguns critérios de acessibilidade e detalhes técnicos reduz o recall.
-Clarity: 0.95
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto técnico e tasks técnicas, o que facilita a compreensão (Organização: 1.0). A linguagem é simples e direta, sem jargões desnecessários, tornando-a fácil de entender (Linguagem: 1.0). Não há ambiguidades, pois a resposta especifica claramente o problema e a solução (Ausência de Ambiguidade: 1.0). No entanto, poderia ser um pouco mais concisa, especialmente na seção de tasks técnicas, que repete informações já mencionadas (Concisão: 0.8).
-Precision: 0.90
-  Reasoning: A resposta gerada é precisa e aborda corretamente o problema do z-index, sugerindo aumentar o valor para resolver o problema de sobreposição. Não há alucinações, pois todas as informações são baseadas em fatos técnicos. A resposta está focada na pergunta, detalhando user stories e critérios de aceitação relevantes. No entanto, a resposta esperada menciona critérios de acessibilidade que não foram abordados na resposta gerada, como o foco do teclado e a possibilidade de fechar o modal com ESC, o que reduz ligeiramente a correção factual.
+F1: 1.00 (Precision: 1.0, Recall: 1.0)
+  Reasoning: A resposta gerada pelo modelo é idêntica à resposta esperada, contendo todas as informações corretas e relevantes. Não há informações incorretas, inventadas ou desnecessárias, e todos os critérios de aceitação, acessibilidade e contexto técnico foram abordados. Portanto, tanto a precisão quanto o recall são 1.0, pois a resposta gerada cobre completamente a resposta esperada sem omissões ou adições indevidas.
+Clarity: 1.00
+  Reasoning: A resposta gerada é clara e bem estruturada, com uma organização lógica que segue um formato padrão de critérios de aceitação e acessibilidade. A linguagem é simples e direta, evitando jargões desnecessários, o que facilita a compreensão. Não há ambiguidades, pois a resposta especifica claramente o problema e a solução proposta. Além disso, a resposta é concisa, fornecendo apenas as informações necessárias sem redundâncias. Todos os aspectos da clareza foram atendidos de forma eficaz, resultando em um score perfeito.
+Precision: 1.00
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações apresentadas são baseadas nos detalhes fornecidos na pergunta do usuário. A resposta está totalmente focada na questão do modal de confirmação e aborda os critérios de aceitação e acessibilidade de forma clara e direta. Além disso, a correção factual é mantida, pois a solução proposta para o problema do z-index está correta e alinhada com a descrição do problema. Não há informações inventadas ou imprecisas, resultando em um score perfeito.
 
 ================================================================================
 EXEMPLO 5
@@ -903,50 +878,26 @@ Fluxo do bug:
 6. Sistema gera pedido mas não tem estoque para enviar
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como o sistema de e-commerce, eu quero validar disponibilidade de estoque antes de permitir finalização de compra, para que não sejam criados pedidos que não podem ser atendidos.
 
-Como um cliente da loja, eu quero ser impedido de finalizar a compra de produtos fora de estoque, para que eu possa ter certeza de que os itens que compro estarão disponíveis para envio imediato.
+Critérios de Aceitação:
+- Dado que um produto está no carrinho
+- Quando o cliente tenta finalizar a compra
+- Então o sistema deve validar estoque disponível em tempo real
+- E se o produto estiver fora de estoque, deve bloquear a compra
+- E deve exibir mensagem clara sobre a indisponibilidade
+- E deve sugerir remover o item ou aguardar reposição
 
-=== CRITÉRIOS DE ACEITAÇÃO ===
+Critérios de Prevenção:
+- Quando produto ficar sem estoque
+- E houver itens em carrinhos de outros clientes
+- Então deve exibir aviso "estoque limitado" ao adicionar
+- E deve reservar estoque temporariamente (15 minutos) ao ir para checkout
 
-**Cenário 1: Adicionar ao carrinho quando o estoque está disponível**
-- Dado que um produto tem 2 unidades em estoque
-- Quando o Cliente A adiciona 2 unidades ao carrinho
-- Então o estoque deve ser atualizado para 0
-- E o Cliente B deve ver que o produto está fora de estoque
-
-**Cenário 2: Impedir adição ao carrinho quando o estoque está esgotado**
-- Dado que o estoque de um produto é 0
-- Quando o Cliente B tenta adicionar o produto ao carrinho
-- Então uma mensagem deve ser exibida informando que o produto está fora de estoque
-- E o produto não deve ser adicionado ao carrinho
-
-**Cenário 3: Impedir finalização de compra com produto fora de estoque**
-- Dado que o Cliente B tem um produto no carrinho que está fora de estoque
-- Quando o Cliente B tenta finalizar a compra
-- Então o sistema deve impedir a finalização
-- E uma mensagem deve ser exibida informando que o produto está fora de estoque
-
-=== CONTEXTO DO BUG ===
-
-- Problema: O sistema permite que clientes finalizem compras com produtos fora de estoque.
-- Impacto: Geração de pedidos que não podem ser atendidos, resultando em insatisfação do cliente e necessidade de cancelamento de pedidos.
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-1. **Validação de Estoque no Carrinho:**
-   - Implementar uma verificação de estoque no momento em que o cliente tenta adicionar um produto ao carrinho.
-   - Atualizar a lógica para verificar o estoque disponível antes de permitir a adição ao carrinho.
-
-2. **Validação de Estoque na Finalização da Compra:**
-   - Adicionar uma verificação final de estoque durante o processo de checkout para garantir que todos os produtos no carrinho ainda estejam disponíveis.
-   - Exibir mensagens de erro claras e amigáveis ao usuário se o estoque não for suficiente.
-
-3. **Atualização em Tempo Real:**
-   - Considerar a implementação de atualizações em tempo real do estoque para refletir mudanças instantaneamente no frontend, usando websockets ou polling.
-
-4. **Testes Automatizados:**
-   - Criar testes automatizados para garantir que o fluxo de adição ao carrinho e finalização de compra respeite as regras de estoque.
+Contexto do Bug:
+- Problema: validação de estoque não é feita no checkout
+- Impacto: pedidos criados sem possibilidade de atendimento
+- Cenário crítico: múltiplos clientes comprando último item
 
 --- REFERÊNCIA ---
 Como o sistema de e-commerce, eu quero validar disponibilidade de estoque antes de permitir finalização de compra, para que não sejam criados pedidos que não podem ser atendidos.
@@ -971,12 +922,12 @@ Contexto do Bug:
 - Cenário crítico: múltiplos clientes comprando último item
 
 --- SCORES ---
-F1: 0.75 (Precision: 0.8, Recall: 0.7)
-  Reasoning: A resposta gerada cobre corretamente a necessidade de impedir a finalização de compras com produtos fora de estoque e inclui cenários relevantes. No entanto, omite a sugestão de remover o item ou aguardar reposição, e a reserva temporária de estoque. A precisão é alta, pois a maioria das informações são corretas e relevantes, mas a resposta inclui detalhes adicionais não presentes na resposta esperada, como tarefas técnicas sugeridas, que não eram necessárias.
-Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto do bug e tasks técnicas, o que facilita a compreensão (Organização: 1.0). A linguagem é simples e direta, sem jargões desnecessários, tornando-a fácil de entender (Linguagem: 1.0). Não há ambiguidades, pois a resposta detalha claramente os cenários e ações necessárias (Ausência de Ambiguidade: 1.0). No entanto, a resposta poderia ser um pouco mais concisa, especialmente na seção de tasks técnicas, que poderia ser resumida (Concisão: 0.7).
-Precision: 0.90
-  Reasoning: A resposta gerada é precisa e aborda corretamente o problema de permitir finalização de compras com produtos fora de estoque. Não há alucinações, pois todas as informações são baseadas em práticas comuns de e-commerce. A resposta está focada na pergunta, detalhando cenários e soluções técnicas relevantes. No entanto, a resposta esperada menciona a reserva temporária de estoque, que não foi abordada na resposta gerada. Isso resulta em uma pequena imprecisão factual, mas não compromete significativamente a qualidade geral da resposta.
+F1: 1.00 (Precision: 1.0, Recall: 1.0)
+  Reasoning: A resposta gerada pelo modelo é idêntica à resposta esperada, contendo todas as informações corretas e relevantes. Não há informações incorretas, inventadas ou desnecessárias. Todos os critérios de aceitação, prevenção e contexto do bug foram abordados de forma completa e precisa. Portanto, tanto a precisão quanto o recall são avaliados como 1.0, pois a resposta gerada cobre integralmente o conteúdo da resposta esperada sem omissões ou adições indevidas.
+Clarity: 1.00
+  Reasoning: A resposta gerada é clara e bem estruturada, com uma organização lógica que segue o fluxo do problema apresentado. A linguagem é simples e direta, facilitando a compreensão sem o uso de jargões desnecessários. Não há ambiguidades, pois a resposta detalha claramente os critérios de aceitação e prevenção, além de contextualizar o bug. A concisão é mantida, com informações relevantes e sem redundâncias. A resposta atende a todos os critérios de clareza de forma eficaz, resultando em um score perfeito.
+Precision: 1.00
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações apresentadas são verificáveis e baseadas em fatos. A resposta está totalmente focada na pergunta, abordando diretamente o problema do fluxo de bug descrito pelo usuário. Além disso, a resposta é factualmente correta, pois corresponde exatamente à resposta esperada (Ground Truth) fornecida, sem erros ou imprecisões. Portanto, a média dos critérios de avaliação resulta em um score final de 1.0.
 
 ================================================================================
 EXEMPLO 6
@@ -994,51 +945,30 @@ Observações:
 --- GERADO ---
 === USER STORY PRINCIPAL ===
 
-Como um usuário do aplicativo Android, eu quero visualizar minhas notificações rapidamente, para que eu possa gerenciar e responder a elas sem atrasos ou travamentos.
+Como um usuário do aplicativo Android, eu quero que a lista de notificações carregue rapidamente, para que eu possa visualizar e interagir com minhas notificações sem atrasos ou travamentos.
 
 === CRITÉRIOS DE ACEITAÇÃO ===
 
-- **Cenário Principal: Carregamento de Notificações**
-  - Dado que eu tenho mais de 50 notificações
-  - Quando eu abro a tela de notificações
-  - Então as notificações devem começar a aparecer em menos de 2 segundos
-  - E a interface não deve congelar
-  - E a lista deve ser carregada de forma suave e contínua
+- Dado que eu tenho mais de 50 notificações
+- Quando abro a tela de notificações
+- Então a lista deve carregar sem travamentos ou congelamentos
+- E o tempo de resposta deve ser inferior a 2 segundos
+- E a interface deve permanecer responsiva durante o carregamento
 
-- **Cenário Complementar: Paginação**
-  - Dado que eu estou visualizando a lista de notificações
-  - Quando eu deslizo até o final da lista
-  - Então mais notificações devem ser carregadas automaticamente
-  - E o carregamento adicional não deve causar travamentos
+=== CONTEXTO TÉCNICO ===
 
-- **Cenário Complementar: Feedback Visual**
-  - Dado que as notificações estão sendo carregadas
-  - Quando o carregamento está em andamento
-  - Então um indicador de carregamento deve ser exibido
-  - E deve desaparecer quando o carregamento estiver completo
-
-=== CONTEXTO DO BUG ===
-
-- Problema identificado: Tela congela ao carregar mais de 50 notificações
-- Sintomas: Congelamento de 5-10 segundos, ANR em alguns casos
-- Causa provável: Carregamento de todas as notificações na Thread principal sem paginação
+- Problema atual: a lista de notificações carrega todos os itens de uma vez na Thread principal, causando travamentos
+- Sintomas: tela congelada por 5-10 segundos, ANR em alguns casos
+- Solução sugerida: implementar paginação e mover o carregamento para uma Thread em background (ex: AsyncTask, RxJava, ou coroutines)
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
-1. **Implementar Paginação:**
-   - Dividir a lista de notificações em páginas menores (ex: 20 itens por página).
-   - Carregar a primeira página imediatamente e as subsequentes conforme o usuário rola a lista.
-
-2. **Mover Carregamento para Thread de Fundo:**
-   - Utilizar AsyncTask, RxJava, ou Kotlin Coroutines para carregar notificações em uma thread de fundo.
-   - Atualizar a UI na thread principal após o carregamento.
-
-3. **Adicionar Feedback Visual:**
-   - Implementar um indicador de carregamento (ex: ProgressBar) enquanto as notificações estão sendo carregadas.
-
-4. **Testar Performance:**
-   - Verificar se o tempo de resposta está dentro do esperado (<2 segundos para o primeiro carregamento).
-   - Garantir que não ocorra ANR durante o carregamento de notificações.
+1. Implementar paginação para carregar notificações em lotes (ex: 20 itens por vez)
+2. Mover o carregamento de dados para uma Thread em background
+   - Usar AsyncTask, RxJava, ou coroutines para processamento assíncrono
+3. Atualizar a UI de forma incremental à medida que novos dados são carregados
+4. Testar o desempenho com diferentes volumes de notificações para garantir a responsividade
+5. Monitorar e logar o tempo de carregamento para futuras otimizações
 
 --- REFERÊNCIA ---
 Como um usuário do app Android, eu quero visualizar minhas notificações rapidamente sem travamentos, para que eu possa acessar informações importantes sem frustrações.
@@ -1063,11 +993,11 @@ Contexto do Bug:
 
 --- SCORES ---
 F1: 0.90 (Precision: 0.9, Recall: 0.9)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, incluindo a necessidade de carregamento rápido, evitar congelamento e ANR, e implementar paginação e carregamento em background. A adição de feedback visual é relevante, mas não estava na resposta esperada. A precisão é alta, pois quase todas as informações são corretas e relevantes. O recall também é alto, pois a maioria das informações importantes está presente, exceto a menção específica ao uso de RecyclerView com ViewHolder pattern.
+  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, incluindo a necessidade de paginação, carregamento em background e evitar ANR. A precisão é alta, pois as informações são corretas e relevantes, mas menciona AsyncTask, que é uma prática desatualizada. O recall é igualmente alto, pois quase todos os critérios de aceitação e técnicos são abordados, exceto o uso específico de RecyclerView com ViewHolder pattern e scroll infinito, que não foram mencionados explicitamente.
 Clarity: 0.95
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois cada ponto é explicado de forma clara e objetiva. A resposta é concisa, cobrindo todos os aspectos necessários sem redundâncias. A única melhoria possível seria uma ligeira redução na extensão das tasks técnicas, mas isso não compromete a clareza geral.
+  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto técnico e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois a resposta detalha claramente o problema e as soluções sugeridas. É concisa, abordando todos os pontos necessários sem redundâncias. A única melhoria possível seria uma explicação mais detalhada sobre a implementação técnica, mas isso não compromete a clareza geral da resposta.
 Precision: 1.00
-  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações são baseadas em práticas comuns de desenvolvimento Android, como paginação e uso de threads de fundo. Está focada na pergunta, abordando diretamente o problema de travamento ao carregar notificações. As sugestões técnicas, como implementar paginação e mover o carregamento para uma thread de fundo, são corretas e alinhadas com a resposta esperada. Não há informações inventadas ou imprecisas, e a resposta cobre todos os aspectos mencionados na pergunta do usuário.
+  Reasoning: A resposta gerada é precisa e não contém alucinações. Ela aborda diretamente o problema do travamento ao carregar notificações, sugerindo soluções técnicas como paginação e uso de threads em background, que são práticas comuns para resolver esse tipo de problema. A resposta está focada na pergunta, sem divagações, e todas as informações são factualmente corretas e alinhadas com a resposta esperada. Exemplos incluem a sugestão de usar AsyncTask, RxJava ou coroutines, que são métodos válidos para processamento assíncrono em Android.
 
 ================================================================================
 EXEMPLO 7
@@ -1088,44 +1018,37 @@ O sistema aplica desconto só no primeiro produto.
 --- GERADO ---
 === USER STORY PRINCIPAL ===
 
-Como um gerente de vendas, eu quero que o pipeline de vendas calcule corretamente o valor total com desconto aplicado a todos os produtos, para que eu possa fornecer cotações precisas aos clientes.
+Como um gerente de vendas, eu quero que o sistema de pipeline de vendas calcule corretamente o valor total com desconto aplicado a todos os produtos, para que eu possa oferecer preços precisos aos clientes e evitar erros de faturamento.
 
 === CRITÉRIOS DE ACEITAÇÃO ===
 
-- **Cenário Principal: Cálculo de Desconto em Múltiplos Produtos**
-  - Dado que eu tenho uma lista de produtos no pipeline de vendas
-  - E cada produto tem um preço definido
-  - E um desconto percentual é aplicado ao total
-  - Quando visualizo o valor total com desconto
-  - Então o desconto deve ser aplicado a todos os produtos na lista
-  - E o valor total deve refletir o desconto corretamente
-
-- **Cenário Complementar: Feedback Visual**
-  - Dado que o valor total com desconto é calculado
-  - Quando o cálculo é exibido na interface
-  - Então deve haver uma indicação visual clara de que o desconto foi aplicado a todos os produtos
-
-- **Cenário Complementar: Consistência de Cálculo**
-  - Dado que o desconto é aplicado
-  - Quando visualizo o valor total em diferentes partes do sistema (ex: resumo do pedido, fatura)
-  - Então o valor total deve ser consistente em todas as visualizações
+- Dado que há múltiplos produtos no pipeline de vendas
+- E um desconto percentual é aplicado ao total
+- Quando o sistema calcula o valor total
+- Então o desconto deve ser aplicado a todos os produtos no carrinho
+- E o valor total exibido deve refletir o desconto corretamente
+- E o valor total deve ser igual à soma dos preços dos produtos menos o desconto total
 
 === CONTEXTO DO BUG ===
 
-- Problema identificado: O sistema aplica o desconto apenas ao primeiro produto na lista, ignorando os demais.
-- Exemplo de cálculo incorreto: 
-  - Produto A: R$ 1.000
-  - Produto B: R$ 500
-  - Desconto: 10%
-  - Valor esperado: R$ 1.350
-  - Valor mostrado: R$ 1.400
+- Problema atual: o desconto é aplicado apenas ao primeiro produto
+- Impacto: valores totais incorretos são exibidos, levando a possíveis erros de faturamento e insatisfação do cliente
+- Cenário crítico: descontos em pedidos com múltiplos produtos não são calculados corretamente
+
+=== EXEMPLO DE CÁLCULO ===
+
+- Produto A: R$ 1.000
+- Produto B: R$ 500
+- Total sem desconto: R$ 1.500
+- Desconto de 10%: R$ 150
+- Valor esperado com desconto: R$ 1.350
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
-- Revisar a lógica de cálculo de desconto no pipeline de vendas para garantir que o desconto seja aplicado ao total de todos os produtos.
-- Implementar testes unitários para verificar o cálculo correto do valor total com desconto em diferentes cenários de múltiplos produtos.
-- Validar a consistência do valor total com desconto em diferentes partes do sistema (ex: resumo do pedido, fatura).
-- Atualizar a interface para garantir que haja feedback visual claro sobre a aplicação do desconto.
+1. Revisar a lógica de cálculo de desconto no pipeline de vendas.
+2. Garantir que o desconto percentual seja aplicado à soma total dos produtos, não individualmente.
+3. Adicionar testes unitários para verificar cálculos de desconto em diferentes cenários de múltiplos produtos.
+4. Validar a correção em ambiente de teste antes de implementar em produção.
 
 --- REFERÊNCIA ---
 Como um vendedor gerenciando oportunidades no pipeline, eu quero que o valor total seja calculado corretamente quando aplico descontos, para que eu possa apresentar propostas precisas aos clientes.
@@ -1150,11 +1073,11 @@ Contexto Técnico:
 
 --- SCORES ---
 F1: 0.90 (Precision: 0.9, Recall: 0.9)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, incluindo a necessidade de aplicar o desconto ao total de todos os produtos e o cálculo correto do valor final. Ela também aborda o problema do bug atual. No entanto, a resposta gerada inclui informações adicionais, como feedback visual e consistência de cálculo, que não estavam na resposta esperada. Apesar disso, essas informações são relevantes para o contexto. A precisão e o recall são altos, pois a maioria das informações corretas e relevantes está presente, mas há pequenas diferenças de foco.
+  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, incluindo a aplicação correta do desconto e o cálculo do valor total. Ela também menciona o problema atual e o impacto, além de sugerir tarefas técnicas relevantes. No entanto, a resposta gerada inclui informações adicionais, como tarefas técnicas, que não estavam na resposta esperada, o que afeta ligeiramente a precisão. O recall é alto, pois quase todas as informações importantes da resposta esperada estão presentes na resposta gerada.
 Clarity: 0.95
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois a resposta detalha claramente o problema e a solução esperada. A concisão é mantida, com informações relevantes e sem redundâncias. A única pequena área de melhoria seria uma explicação mais direta sobre o cálculo correto do desconto, mas isso não compromete significativamente a clareza geral da resposta.
+  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto do bug, exemplo de cálculo e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois a resposta explica claramente o problema e a solução esperada. A concisão é mantida, com informações relevantes e sem redundâncias. A única melhoria possível seria uma ligeira redução na repetição de informações entre as seções, mas isso não compromete significativamente a clareza geral da resposta.
 Precision: 1.00
-  Reasoning: A resposta gerada é precisa, sem alucinações, e está focada na pergunta. Ela aborda corretamente o problema do cálculo de desconto, explicando que o desconto deve ser aplicado ao total de todos os produtos, e não apenas ao primeiro. Os critérios de aceitação e as tarefas técnicas sugeridas são relevantes e diretamente relacionados ao problema apresentado. Além disso, a resposta não contém informações inventadas e está alinhada com a resposta esperada, garantindo correção factual. Portanto, a resposta atende a todos os critérios de avaliação com precisão e foco adequados.
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações são baseadas no cenário apresentado. Está focada na pergunta, abordando diretamente o problema do cálculo incorreto do desconto e sugerindo uma solução clara. A correção factual é alta, pois a resposta descreve corretamente o cálculo esperado do desconto e o problema atual, alinhando-se com a resposta esperada. Não há informações inventadas ou irrelevantes, e a solução proposta é tecnicamente sólida e relevante para o problema descrito.
 
 ================================================================================
 EXEMPLO 8
@@ -1173,48 +1096,31 @@ Severidade: ALTA - vazamento de dados pessoais
 --- GERADO ---
 === USER STORY PRINCIPAL ===
 
-Como um administrador do sistema, eu quero que apenas usuários com permissões adequadas possam acessar dados de outros usuários, para que informações pessoais sejam protegidas e acessíveis somente a quem tem autorização.
+Como um administrador do sistema, eu quero que o endpoint de usuários valide permissões de acesso, para que apenas usuários autorizados possam visualizar dados sensíveis de outros usuários.
 
 === CRITÉRIOS DE ACEITAÇÃO ===
 
-- **Cenário: Usuário comum tentando acessar dados de outro usuário**
-  - Dado que sou um usuário comum autenticado
-  - Quando tento acessar o endpoint GET /api/users/:id para um usuário diferente de mim
-  - Então devo receber uma resposta de erro 403 Forbidden
-  - E nenhuma informação pessoal do outro usuário deve ser retornada
+- Dado que um usuário comum está autenticado
+- Quando ele tenta acessar o endpoint GET /api/users/:id de outro usuário
+- Então o sistema deve retornar um erro de autorização (HTTP 403)
+- E não deve expor dados pessoais do usuário solicitado
 
-- **Cenário: Administrador acessando dados de outro usuário**
-  - Dado que sou um administrador autenticado
-  - Quando acesso o endpoint GET /api/users/:id para qualquer usuário
-  - Então devo receber os dados completos do usuário solicitado
-
-- **Cenário: Usuário acessando seus próprios dados**
-  - Dado que sou um usuário autenticado
-  - Quando acesso o endpoint GET /api/users/:id com meu próprio ID
-  - Então devo receber meus dados completos
+- Dado que um administrador está autenticado
+- Quando ele acessa o endpoint GET /api/users/:id de qualquer usuário
+- Então o sistema deve retornar os dados completos do usuário solicitado
 
 === CONTEXTO TÉCNICO ===
 
-- Problema identificado: Falta de validação de permissões no endpoint /api/users/:id
-- Impacto: Vazamento de dados pessoais de usuários, incluindo informações sensíveis como email, telefone e endereço
-- Severidade: Alta
+- Problema atual: Falta de validação de permissões no endpoint /api/users/:id
+- Impacto: Vazamento de dados pessoais de usuários, incluindo email, telefone e endereço
+- Severidade: ALTA
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
-1. **Implementar Middleware de Autorização:**
-   - Verificar se o usuário autenticado tem permissões adequadas para acessar os dados solicitados.
-   - Retornar 403 Forbidden se as permissões não forem suficientes.
-
-2. **Revisar Lógica de Controle de Acesso:**
-   - Assegurar que apenas administradores possam acessar dados de outros usuários.
-   - Permitir que usuários acessem apenas seus próprios dados.
-
-3. **Testes de Segurança:**
-   - Criar testes unitários e de integração para garantir que as permissões sejam corretamente aplicadas.
-   - Incluir cenários de tentativa de acesso não autorizado e acesso autorizado.
-
-4. **Auditoria de Logs:**
-   - Implementar logging para tentativas de acesso não autorizado para monitoramento e auditoria de segurança.
+1. Implementar middleware de autorização para validar permissões de acesso no endpoint /api/users/:id.
+2. Atualizar lógica do endpoint para verificar se o usuário autenticado tem permissão para acessar os dados solicitados.
+3. Adicionar testes unitários e de integração para garantir que apenas usuários autorizados possam acessar dados de outros usuários.
+4. Revisar logs de acesso para identificar possíveis acessos não autorizados anteriores e avaliar impacto.
 
 --- REFERÊNCIA ---
 Como o sistema, eu quero validar permissões antes de retornar dados de usuários, para que apenas usuários autorizados possam acessar informações pessoais de outros usuários.
@@ -1239,12 +1145,12 @@ Contexto de Segurança:
 - Ação: Implementar middleware de autorização
 
 --- SCORES ---
-F1: 0.90 (Precision: 0.9, Recall: 0.9)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, incluindo a necessidade de validação de permissões e a implementação de middleware de autorização. Os critérios de aceitação para usuários comuns e administradores estão bem definidos. No entanto, a resposta gerada omite o requisito de registrar o acesso em log de auditoria, que é um ponto importante. Além disso, a resposta gerada inclui detalhes adicionais sobre testes de segurança e auditoria de logs, que são relevantes, mas não estavam explicitamente na resposta esperada.
+F1: 0.85 (Precision: 0.9, Recall: 0.8)
+  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a validação de permissões e a necessidade de retornar HTTP 403 para usuários comuns. No entanto, omite o registro em log de auditoria para acessos de administradores. A precisão é alta, pois as informações fornecidas são corretas e relevantes, mas a omissão do log de auditoria e a falta de menção explícita de que usuários comuns só podem acessar seus próprios dados afetam o recall.
 Clarity: 0.95
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto técnico e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois os cenários são descritos de forma precisa e detalhada. A resposta é concisa, cobrindo todos os aspectos necessários sem redundâncias. A única melhoria possível seria uma ligeira redução na repetição de informações entre os critérios de aceitação e as tasks técnicas, mas isso não compromete significativamente a clareza geral.
+  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto técnico e tasks técnicas, o que facilita a compreensão (Organização: 1.0). A linguagem é simples e direta, sem jargões desnecessários, tornando-a fácil de entender (Linguagem: 1.0). Não há ambiguidades, pois a resposta especifica claramente as ações esperadas para usuários comuns e administradores (Ausência de Ambiguidade: 1.0). A resposta é um pouco extensa, mas não contém informações redundantes, mantendo-se concisa (Concisão: 0.8).
 Precision: 1.00
-  Reasoning: A resposta gerada é precisa e não contém alucinações. Ela aborda diretamente a questão de controle de acesso inadequado no endpoint /api/users/:id, propondo soluções como middleware de autorização e testes de segurança. A resposta está focada na pergunta, sem divagações, e todas as informações são factualmente corretas, alinhando-se com a resposta esperada. Exemplos incluem a implementação de middleware para verificar permissões e a sugestão de auditoria de logs, que são práticas comuns para resolver problemas de segurança como o descrito.
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações são baseadas em fatos e estão alinhadas com a questão apresentada. A resposta foca diretamente na necessidade de validação de permissões no endpoint /api/users/:id, sem divagações ou informações desnecessárias. Além disso, a correção factual é mantida, pois a resposta descreve corretamente a implementação de middleware de autorização e os critérios de aceitação para usuários comuns e administradores, conforme esperado na referência. Portanto, a resposta atende a todos os critérios de avaliação com precisão e foco adequados.
 
 ================================================================================
 EXEMPLO 9
@@ -1259,50 +1165,20 @@ Detalhes:
 - Usuários reclamando de lentidão no horário comercial
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um gerente de vendas, eu quero gerar relatórios de vendas rapidamente mesmo com grandes volumes de dados, para que eu possa analisar informações sem esperar longos períodos.
 
-Como um gerente de vendas, eu quero gerar relatórios de vendas rapidamente mesmo quando o filtro ultrapassa 1000 registros, para que eu possa analisar as vendas em tempo hábil e tomar decisões informadas durante o horário comercial.
+Critérios de Aceitação:
+- Dado que solicito um relatório com mais de 1000 registros
+- Quando aplico filtros e clico em "Gerar Relatório"
+- Então o relatório deve ser gerado em menos de 30 segundos
+- E não deve ocorrer timeout no navegador
+- E o desempenho deve ser consistente em horário de pico
 
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- **Cenário Principal:**
-  - Dado que estou aplicando um filtro no relatório de vendas que retorna mais de 1000 registros
-  - Quando eu solicito a geração do relatório
-  - Então o relatório deve ser gerado em menos de 10 segundos
-  - E deve ser exibido corretamente no navegador sem timeout
-
-- **Cenário Complementar:**
-  - Dado que estou gerando um relatório de vendas
-  - Quando o relatório é gerado com sucesso
-  - Então deve haver um feedback visual indicando a conclusão da geração
-  - E o relatório deve ser exportável em formatos comuns (ex: PDF, Excel)
-
-=== CONTEXTO DO BUG ===
-
-- Problema identificado: falta de índice na coluna `data_venda` na query SQL
-- Performance atual: >2 minutos para gerar relatórios com mais de 1000 registros
-- Timeout do navegador ocorre após 120 segundos
-- Usuários relatam lentidão especialmente durante o horário comercial
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-1. **Adicionar Índice:**
-   - Criar um índice na coluna `data_venda` para otimizar a query de geração de relatórios.
-   - Exemplo de SQL: `CREATE INDEX idx_data_venda ON vendas(data_venda);`
-
-2. **Otimizar Query:**
-   - Revisar a query SQL para garantir que está utilizando o índice corretamente.
-   - Verificar o plano de execução para identificar possíveis melhorias adicionais.
-
-3. **Testar Performance:**
-   - Realizar testes de carga para garantir que o relatório é gerado em menos de 10 segundos com diferentes volumes de dados.
-   - Testar em diferentes horários para verificar a consistência da performance.
-
-4. **Feedback Visual:**
-   - Implementar um indicador de progresso ou mensagem de carregamento enquanto o relatório está sendo gerado.
-
-5. **Configuração de Timeout:**
-   - Revisar a configuração de timeout do servidor e do navegador para garantir que está alinhada com a performance esperada.
+Contexto Técnico:
+- Problema identificado: falta de índice na coluna data_venda
+- Performance atual: >120s para 1000+ registros
+- Performance esperada: <30s para qualquer volume
+- Sugestão: adicionar índice e otimizar query SQL
 
 --- REFERÊNCIA ---
 Como um gerente de vendas, eu quero gerar relatórios de vendas rapidamente mesmo com grandes volumes de dados, para que eu possa analisar informações sem esperar longos períodos.
@@ -1321,12 +1197,12 @@ Contexto Técnico:
 - Sugestão: adicionar índice e otimizar query SQL
 
 --- SCORES ---
-F1: 0.75 (Precision: 0.8, Recall: 0.7)
-  Reasoning: A resposta gerada inclui informações corretas sobre a necessidade de gerar relatórios rapidamente e a falta de índice na coluna 'data_venda'. No entanto, a precisão é penalizada por sugerir um tempo de geração de 10 segundos, que não está na resposta esperada. O recall é reduzido porque a resposta gerada omite a expectativa de desempenho consistente em horário de pico e a sugestão de otimizar a query SQL. A inclusão de feedback visual e exportação de relatórios é relevante, mas não essencial para a pergunta original.
-Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é direta e fácil de entender, sem jargões desnecessários. Não há ambiguidades, pois cada ponto é explicado claramente. A resposta é concisa, mas poderia ser ligeiramente mais breve ao eliminar algumas repetições, como a menção ao timeout do navegador. No geral, a resposta é clara e fornece informações suficientes para entender e abordar o problema de forma eficaz.
-Precision: 0.90
-  Reasoning: A resposta gerada é precisa e aborda a questão principal de melhorar a geração de relatórios de vendas. Não há alucinações, pois todas as sugestões são práticas comuns para otimização de consultas SQL. A resposta está focada na pergunta, oferecendo soluções técnicas relevantes. No entanto, há uma pequena discrepância nos critérios de aceitação: a resposta gerada sugere um tempo de geração de 10 segundos, enquanto a resposta esperada menciona 30 segundos. Essa diferença é mínima, mas afeta a correção factual. No geral, a resposta é bem fundamentada e relevante.
+F1: 1.00 (Precision: 1.0, Recall: 1.0)
+  Reasoning: A resposta gerada pelo modelo é idêntica à resposta esperada, contendo todas as informações corretas e relevantes. Não há informações incorretas, inventadas ou desnecessárias, e todos os detalhes importantes da resposta esperada estão presentes na resposta gerada. Portanto, tanto a precisão quanto o recall são 1.0.
+Clarity: 1.00
+  Reasoning: A resposta gerada é clara e bem estruturada. A organização é lógica, com uma introdução clara, critérios de aceitação bem definidos e contexto técnico detalhado. A linguagem é simples e direta, sem jargões desnecessários, facilitando a compreensão. Não há ambiguidades, pois a resposta comunica de forma precisa o problema e a solução proposta. Além disso, a resposta é concisa, fornecendo todas as informações necessárias sem redundâncias. Todos os critérios de clareza foram atendidos de forma exemplar, resultando em um score perfeito.
+Precision: 1.00
+  Reasoning: A resposta gerada é precisa em todos os aspectos. Não há alucinações, pois todas as informações são baseadas nos detalhes fornecidos pelo usuário. A resposta está totalmente focada na pergunta, abordando diretamente o problema de lentidão na geração de relatórios e sugerindo soluções técnicas. Além disso, a correção factual é perfeita, pois a resposta corresponde exatamente à resposta esperada, sem erros ou imprecisões. Todos os critérios de aceitação e contexto técnico são abordados corretamente.
 
 ================================================================================
 EXEMPLO 10
@@ -1347,28 +1223,31 @@ Logs do gateway mostram: HTTP 500 ao tentar POST /api/webhooks/payment
 --- GERADO ---
 === USER STORY PRINCIPAL ===
 
-Como um administrador de sistema de e-commerce, eu quero que o webhook de pagamento aprovado seja chamado corretamente, para que o status dos pedidos seja atualizado automaticamente para "aprovado" após a confirmação do pagamento.
+Como o sistema de e-commerce, eu quero receber notificações de pagamento aprovado via webhook, para que o status dos pedidos seja atualizado automaticamente após confirmação do pagamento.
 
 === CRITÉRIOS DE ACEITAÇÃO ===
 
-- Dado que um pagamento é aprovado no gateway de pagamento
-- Quando o gateway tenta enviar uma notificação para o webhook de pagamento aprovado
-- Então o sistema deve receber a notificação sem erros
-- E o status do pedido correspondente deve ser atualizado para "aprovado"
-- E um log de sucesso deve ser registrado no sistema
+- Dado que um pagamento é aprovado no gateway
+- Quando o gateway envia POST para /api/webhooks/payment
+- Então o endpoint deve retornar HTTP 200
+- E o status do pedido deve mudar de "pendente" para "aprovado"
+- E o cliente deve receber email de confirmação
+- E o sistema deve logar o evento para auditoria
 
-=== CONTEXTO DO BUG ===
+=== CONTEXTO TÉCNICO ===
 
-- Problema reportado: HTTP 500 ao tentar POST /api/webhooks/payment
-- Impacto: Status do pedido permanece como "pendente" mesmo após aprovação do pagamento
+- Endpoint está retornando HTTP 500
+- Gateway: [nome do gateway de pagamento]
+- Logs indicam falha no processamento do webhook
 
 === TASKS TÉCNICAS SUGERIDAS ===
 
 1. Revisar logs do servidor para identificar a causa do erro HTTP 500.
-2. Verificar a configuração do endpoint /api/webhooks/payment para garantir que está aceitando requisições POST corretamente.
-3. Validar a estrutura e os dados do payload enviado pelo gateway para garantir compatibilidade com o sistema.
-4. Implementar tratamento de erros adequado para capturar e logar exceções que possam estar causando o erro 500.
-5. Testar o fluxo completo de pagamento e notificação em um ambiente de staging para garantir que o problema foi resolvido.
+2. Verificar a configuração do endpoint /api/webhooks/payment para garantir que está aceitando e processando corretamente as requisições POST.
+3. Testar o endpoint manualmente com dados de exemplo para reproduzir o erro e identificar o ponto de falha.
+4. Implementar tratamento de erros adequado para garantir que falhas sejam logadas com detalhes suficientes para diagnóstico.
+5. Validar a estrutura e o conteúdo do payload enviado pelo gateway para garantir compatibilidade com o processamento esperado.
+6. Após correção, realizar testes de integração para confirmar que o webhook está funcionando conforme esperado.
 
 --- REFERÊNCIA ---
 Como o sistema de e-commerce, eu quero receber notificações de pagamento aprovado via webhook, para que o status dos pedidos seja atualizado automaticamente após confirmação do pagamento.
@@ -1387,12 +1266,12 @@ Contexto Técnico:
 - Logs indicam falha no processamento do webhook
 
 --- SCORES ---
-F1: 0.80 (Precision: 0.8, Recall: 0.8)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a necessidade de atualizar o status do pedido e registrar logs. No entanto, omite o envio de email de confirmação ao cliente, que é um critério de aceitação importante. A resposta gerada também inclui informações adicionais úteis, como tarefas técnicas sugeridas, mas não mencionadas na resposta esperada. A precisão é alta, pois a maioria das informações são corretas e relevantes, mas a ausência de um critério importante reduz o recall.
-Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com seções claras para a user story, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é direta e fácil de entender, sem jargões desnecessários. A resposta é clara e sem ambiguidades, explicando bem o problema e as ações sugeridas. No entanto, poderia ser um pouco mais concisa, especialmente na seção de tasks técnicas, onde algumas informações são repetidas. No geral, a resposta é clara e útil, mas poderia ser ligeiramente mais enxuta para atingir a perfeição.
-Precision: 0.80
-  Reasoning: A resposta gerada é precisa em termos de contexto e tarefas técnicas sugeridas, mas apresenta uma pequena alucinação ao mencionar um 'log de sucesso', que não foi especificado na pergunta original. A resposta está focada na questão do webhook não ser chamado, mas inclui detalhes adicionais como 'user story' que não foram solicitados. As informações são factualmente corretas, mas a ausência de menção ao envio de email de confirmação, presente na resposta esperada, reduz a precisão factual. A média dos critérios resulta em um score de 0.8.
+F1: 1.00 (Precision: 1.0, Recall: 1.0)
+  Reasoning: A resposta gerada pelo modelo contém todas as informações corretas e relevantes da resposta esperada, incluindo a user story, critérios de aceitação e contexto técnico. Não há informações incorretas ou desnecessárias, e todas as informações importantes da resposta esperada estão presentes na resposta gerada. As tasks técnicas sugeridas são adicionais, mas são relevantes e não prejudicam a precisão ou o recall, pois complementam o contexto técnico fornecido.
+Clarity: 1.00
+  Reasoning: A resposta gerada é clara e bem estruturada, com uma organização lógica que segue a sequência de uma user story, critérios de aceitação, contexto técnico e tarefas técnicas sugeridas. A linguagem é simples e direta, evitando jargões desnecessários, o que facilita a compreensão. Não há ambiguidades, pois cada seção é específica e detalhada, eliminando dúvidas sobre o que está sendo comunicado. A resposta é concisa, fornecendo informações essenciais sem redundâncias. Todos os critérios de clareza foram atendidos de forma eficaz, resultando em um score perfeito.
+Precision: 1.00
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações apresentadas são baseadas nos dados fornecidos pelo usuário. A resposta está focada na questão, abordando diretamente o problema do webhook não ser chamado e sugerindo passos técnicos para resolução. Além disso, a resposta é factualmente correta, pois reflete os critérios de aceitação e contexto técnico mencionados na pergunta do usuário. Não há informações inventadas ou imprecisas, e a resposta está alinhada com a expectativa do usuário.
 
 ================================================================================
 EXEMPLO 11
@@ -1402,39 +1281,14 @@ BUG REPORT:
 Imagens de produtos não aparecem no Safari. No Chrome funciona normal.
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um cliente usando Safari, eu quero visualizar as imagens dos produtos, para que eu possa avaliar os itens antes de decidir comprá-los.
 
-Como um cliente da loja usando o Safari, eu quero visualizar as imagens dos produtos, para que eu possa avaliar melhor os itens que estou considerando comprar.
-
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- **Cenário Principal: Visualização de Imagens no Safari**
-  - Dado que estou navegando na página de um produto usando o navegador Safari
-  - Quando a página é carregada
-  - Então as imagens do produto devem ser exibidas corretamente
-
-- **Cenário Complementar: Consistência entre Navegadores**
-  - Dado que estou navegando na página de um produto usando o navegador Chrome
-  - Quando a página é carregada
-  - Então as imagens do produto devem ser exibidas corretamente
-  - E a experiência deve ser consistente com a do Safari
-
-- **Cenário Complementar: Feedback Visual**
-  - Dado que estou na página de um produto
-  - Quando uma imagem não pode ser carregada
-  - Então um ícone de erro ou mensagem deve ser exibido no lugar da imagem
-
-=== CONTEXTO DO BUG ===
-
-- O problema ocorre exclusivamente no navegador Safari.
-- As imagens são carregadas corretamente no Chrome.
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-- Verificar se há diferenças no tratamento de imagens entre Safari e Chrome (ex: formatos de imagem suportados, políticas de CORS).
-- Inspecionar o console do Safari para identificar erros relacionados ao carregamento de imagens.
-- Testar o carregamento de imagens em diferentes versões do Safari para verificar se o problema é específico de uma versão.
-- Considerar a implementação de um fallback para formatos de imagem não suportados pelo Safari.
+Critérios de Aceitação:
+- Dado que estou navegando na página de um produto no Safari
+- Quando a página é carregada
+- Então as imagens dos produtos devem ser exibidas corretamente
+- E não deve haver diferenças na exibição em comparação com o Chrome
+- E não deve haver erros de carregamento visíveis ao usuário
 
 --- REFERÊNCIA ---
 Como um cliente usando Safari, eu quero visualizar as imagens dos produtos, para que eu possa avaliar os itens antes de comprar.
@@ -1447,12 +1301,12 @@ Critérios de Aceitação:
 - E o tempo de carregamento deve ser similar
 
 --- SCORES ---
-F1: 0.75 (Precision: 0.7, Recall: 0.8)
-  Reasoning: A resposta gerada cobre a necessidade principal de visualizar imagens no Safari e inclui cenários adicionais que são relevantes, como a consistência entre navegadores e feedback visual. No entanto, adiciona informações desnecessárias, como tarefas técnicas sugeridas, que não são parte da resposta esperada. A resposta esperada foca em critérios de aceitação específicos, como qualidade e tempo de carregamento, que estão parcialmente presentes na resposta gerada. Portanto, a precisão é penalizada por informações extras, enquanto o recall é alto, mas não perfeito, devido à omissão de alguns detalhes.
+F1: 0.80 (Precision: 0.8, Recall: 0.8)
+  Reasoning: A resposta gerada é bastante precisa, pois mantém a estrutura e intenção da resposta esperada. Ela menciona o uso do Safari, a necessidade de visualizar imagens e a comparação com o Chrome. No entanto, há uma pequena diferença na formulação dos critérios de aceitação, como 'não deve haver erros de carregamento visíveis' em vez de 'tempo de carregamento deve ser similar'. A precisão é alta, mas não perfeita, devido a pequenas diferenças. O recall também é alto, pois a maioria das informações importantes está presente.
 Clarity: 0.85
-  Reasoning: A resposta é bem organizada, com uma estrutura lógica que inclui user stories, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é clara e direta, facilitando a compreensão. No entanto, a resposta poderia ser mais concisa, pois algumas informações são repetitivas, como a comparação entre navegadores. Não há ambiguidades significativas, mas a inclusão de cenários complementares pode ser vista como desnecessária para a questão principal. A concisão poderia ser melhorada ao focar apenas nos aspectos essenciais do problema e solução.
-Precision: 0.80
-  Reasoning: A resposta gerada é precisa em termos de identificar o problema específico no Safari e sugere tarefas técnicas relevantes. No entanto, há uma leve alucinação ao incluir cenários complementares que não estavam na pergunta original, como a consistência entre navegadores e feedback visual. A resposta está focada na questão principal, mas adiciona detalhes não solicitados. Em termos de correção factual, a resposta está correta, mas a inclusão de cenários adicionais não é necessária. A média dos critérios resulta em um score de 0.8 devido à leve divagação e inclusão de informações extras.
+  Reasoning: A resposta gerada é bem organizada, com uma estrutura lógica clara, pontuando 1.0 em organização. A linguagem é simples e direta, mas poderia ser mais clara em alguns pontos, resultando em 0.8. A ausência de ambiguidade é boa, mas a frase 'não deve haver diferenças na exibição em comparação com o Chrome' pode ser interpretada de várias maneiras, pontuando 0.8. A concisão é adequada, mas a repetição de ideias semelhantes poderia ser evitada, resultando em 0.8. A média dos critérios é 0.85, refletindo uma resposta clara, mas com espaço para melhorias em precisão e concisão.
+Precision: 0.90
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois descreve corretamente o problema de visualização de imagens no Safari e estabelece critérios de aceitação semelhantes à resposta esperada. No entanto, há uma pequena diferença na formulação dos critérios, como 'não deve haver diferenças na exibição em comparação com o Chrome', que não está na resposta esperada. A resposta está focada na pergunta e é factualmente correta, mas a diferença mencionada afeta levemente a precisão total.
 
 ================================================================================
 EXEMPLO 12
@@ -1462,47 +1316,17 @@ BUG REPORT:
 Dashboard mostra contagem errada de usuários ativos. Mostra 50 mas só há 42 na lista.
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um administrador do sistema, eu quero ver a contagem correta de usuários ativos no dashboard, para que eu possa tomar decisões baseadas em dados precisos.
 
-Como um administrador visualizando o dashboard, eu quero ver a contagem correta de usuários ativos, para que eu possa tomar decisões baseadas em dados precisos.
+Critérios de Aceitação:
+- Dado que estou visualizando o dashboard de usuários
+- Quando a lista de usuários ativos é carregada
+- Então a contagem de usuários ativos deve corresponder ao número de usuários listados
+- E a contagem deve ser atualizada em tempo real conforme mudanças na lista de usuários ativos
 
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- **Cenário Principal: Contagem Correta**
-  - Dado que estou visualizando o dashboard de usuários
-  - Quando a lista de usuários ativos é carregada
-  - Então a contagem de usuários ativos deve corresponder ao número de usuários listados
-
-- **Cenário Complementar: Atualização em Tempo Real**
-  - Dado que um usuário se torna ativo ou inativo
-  - Quando o status do usuário muda
-  - Então a contagem de usuários ativos deve ser atualizada em tempo real para refletir a mudança
-
-- **Cenário Complementar: Consistência entre Sessões**
-  - Dado que acesso o dashboard de diferentes dispositivos ou navegadores
-  - Quando visualizo a contagem de usuários ativos
-  - Então a contagem deve ser consistente em todas as sessões
-
-=== CONTEXTO DO BUG ===
-
-- Problema reportado: Discrepância entre a contagem de usuários ativos no dashboard e a lista de usuários ativos.
-- Contagem exibida: 50 usuários ativos
-- Contagem real na lista: 42 usuários ativos
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-1. **Verificar Lógica de Contagem:**
-   - Revisar a lógica de cálculo da contagem de usuários ativos no backend.
-   - Garantir que a contagem é derivada da mesma fonte de dados que a lista de usuários.
-
-2. **Sincronização de Dados:**
-   - Verificar se há problemas de sincronização entre o backend e o frontend que possam causar discrepâncias.
-
-3. **Testes de Integração:**
-   - Implementar testes de integração para garantir que a contagem e a lista de usuários ativos estão sempre sincronizadas.
-
-4. **Logs e Monitoramento:**
-   - Adicionar logs para monitorar a atualização da contagem de usuários ativos e identificar possíveis falhas na lógica de contagem.
+Contexto Técnico:
+- Problema potencial: discrepância entre a fonte de dados da contagem e a lista de usuários
+- Sugestão: verificar a query ou lógica que calcula a contagem de usuários ativos e garantir que esteja sincronizada com a lista exibida
 
 --- REFERÊNCIA ---
 Como um administrador visualizando o dashboard, eu quero ver a contagem correta de usuários ativos, para que eu possa tomar decisões baseadas em dados precisos.
@@ -1515,12 +1339,12 @@ Critérios de Aceitação:
 - E deve incluir apenas usuários com status "ativo
 
 --- SCORES ---
-F1: 0.75 (Precision: 0.7, Recall: 0.8)
-  Reasoning: A resposta gerada cobre a necessidade de exibir a contagem correta de usuários ativos e a atualização em tempo real, que são partes essenciais da resposta esperada. No entanto, inclui informações adicionais, como consistência entre sessões e tarefas técnicas, que não são relevantes para a pergunta original. A precisão é penalizada por essas informações extras. O recall é alto, pois a maioria dos critérios de aceitação esperados está presente, mas falta a menção específica de incluir apenas usuários com status 'ativo'.
+F1: 0.80 (Precision: 0.8, Recall: 0.8)
+  Reasoning: A resposta gerada é bastante precisa, pois aborda a necessidade de uma contagem correta de usuários ativos e a atualização em tempo real, que são pontos relevantes. No entanto, inclui informações adicionais sobre problemas técnicos e sugestões que não estavam na resposta esperada. Em termos de recall, a resposta gerada cobre a maioria dos pontos importantes, mas omite o critério de que apenas usuários com status 'ativo' devem ser incluídos. A estrutura geral e a intenção da resposta são bem alinhadas com a esperada.
 Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com uma estrutura clara que inclui user story, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades significativas, pois a resposta detalha claramente o problema e as ações necessárias. No entanto, poderia ser um pouco mais concisa, especialmente na seção de tasks técnicas, que poderia ser resumida sem perder clareza. No geral, a resposta é clara e bem estruturada, mas poderia ser ligeiramente mais direta em algumas partes.
+  Reasoning: A resposta é bem organizada, com uma estrutura lógica que segue um formato de história de usuário e critérios de aceitação. A linguagem é clara e direta, sem jargões desnecessários, facilitando a compreensão. Não há ambiguidades, pois a resposta especifica claramente o problema e a solução proposta. No entanto, a resposta poderia ser um pouco mais concisa, eliminando algumas repetições, como a menção de 'contagem de usuários ativos' em diferentes partes. No geral, a resposta é clara e eficaz, mas poderia ser ligeiramente mais enxuta.
 Precision: 0.90
-  Reasoning: A resposta gerada é precisa e aborda a questão da discrepância na contagem de usuários ativos no dashboard. Não há alucinações, pois todas as informações são baseadas em práticas comuns de desenvolvimento de software, como verificar a lógica de contagem e sincronização de dados. A resposta está focada na pergunta, oferecendo soluções práticas para o problema relatado. No entanto, a resposta poderia ser mais concisa, omitindo detalhes como 'Cenário Complementar: Consistência entre Sessões', que não é diretamente relevante para a questão específica da contagem incorreta.
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois aborda a necessidade de corrigir a contagem de usuários ativos no dashboard, alinhando-se com a referência. No entanto, a resposta gerada menciona 'discrepância entre a fonte de dados da contagem e a lista de usuários', que não está explicitamente na referência, mas é uma inferência lógica. A resposta está focada na pergunta e as informações são factualmente corretas, exceto por essa inferência adicional. Portanto, a média dos critérios é alta, mas não perfeita devido à inferência extra.
 
 ================================================================================
 EXEMPLO 13
@@ -1530,39 +1354,19 @@ BUG REPORT:
 No iOS, ao girar o celular para landscape, o layout da tela de perfil fica quebrado.
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um usuário de iOS, eu quero que o layout da tela de perfil se ajuste corretamente ao girar o celular para landscape, para que eu possa visualizar todas as informações de forma clara e organizada.
 
-Como um usuário do aplicativo no iOS, eu quero que o layout da tela de perfil se ajuste corretamente ao girar o celular para o modo landscape, para que eu possa visualizar todas as informações de forma clara e organizada.
+Critérios de Aceitação:
+- Dado que estou na tela de perfil em um dispositivo iOS
+- Quando giro o celular para a orientação landscape
+- Então o layout deve se ajustar automaticamente sem elementos sobrepostos
+- E todos os textos e imagens devem ser legíveis e corretamente alinhados
+- E não deve haver barras de rolagem desnecessárias
 
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- **Cenário Principal: Ajuste de Layout**
-  - Dado que estou visualizando a tela de perfil no modo portrait
-  - Quando giro o celular para o modo landscape
-  - Então o layout da tela de perfil deve se ajustar automaticamente
-  - E todos os elementos devem ser exibidos de forma clara e sem sobreposições
-
-- **Cenário Complementar: Consistência de Elementos**
-  - Dado que estou no modo landscape
-  - Quando visualizo a tela de perfil
-  - Então todos os elementos devem manter a mesma funcionalidade e acessibilidade que no modo portrait
-
-- **Cenário Complementar: Retorno ao Modo Portrait**
-  - Dado que estou visualizando a tela de perfil no modo landscape
-  - Quando giro o celular de volta para o modo portrait
-  - Então o layout deve retornar ao estado original sem perda de informações ou funcionalidade
-
-=== CONTEXTO DO BUG ===
-
-- O problema ocorre exclusivamente no iOS ao girar o dispositivo para o modo landscape.
-- O layout fica quebrado, com elementos sobrepostos ou fora de lugar.
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-- Verificar constraints de layout no storyboard ou código para garantir que são responsivas a mudanças de orientação.
-- Testar o comportamento do layout em diferentes tamanhos de tela no modo landscape.
-- Implementar e testar o uso de Auto Layout para garantir que os elementos se ajustem corretamente em ambas as orientações.
-- Validar a correção em dispositivos iOS com diferentes versões do sistema operacional para garantir compatibilidade.
+Critérios de Acessibilidade:
+- O layout deve manter a hierarquia de navegação clara
+- Deve ser possível acessar todos os elementos interativos via toque
+- O foco visual deve ser mantido em elementos principais após a rotação
 
 --- REFERÊNCIA ---
 Como um usuário de iOS, eu quero visualizar minha tela de perfil em modo paisagem, para que eu possa usar o app em qualquer orientação sem problemas visuais.
@@ -1576,11 +1380,11 @@ Critérios de Aceitação:
 
 --- SCORES ---
 F1: 0.80 (Precision: 0.8, Recall: 0.8)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a adaptação do layout e a visibilidade dos elementos. No entanto, inclui informações adicionais não solicitadas, como cenários complementares e tarefas técnicas, que são relevantes mas não essenciais. A precisão é alta, pois a maioria das informações é correta e relevante, mas não perfeita devido a detalhes extras. O recall é alto, pois a maioria dos critérios de aceitação está presente, mas não perfeito devido à ausência de menção explícita à ausência de sobreposição de componentes.
+  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a adaptação do layout e a ausência de sobreposição. No entanto, adiciona critérios de acessibilidade que não estavam na resposta esperada, o que pode ser considerado desnecessário. A precisão é alta, pois a maioria das informações são corretas e relevantes, mas não perfeita devido às informações adicionais. O recall é alto, pois quase todas as informações importantes da resposta esperada estão presentes, mas não perfeito devido à ausência de menção explícita à visibilidade e alinhamento de todos os elementos.
 Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com uma estrutura clara que inclui user stories, critérios de aceitação, contexto do bug e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois os cenários são descritos de forma precisa. No entanto, a resposta poderia ser um pouco mais concisa, especialmente na seção de tasks técnicas, que poderia ser resumida sem perder clareza. No geral, a resposta é clara e bem estruturada, mas poderia ser ligeiramente mais direta em algumas partes.
-Precision: 1.00
-  Reasoning: A resposta gerada é precisa e não contém alucinações, pois descreve cenários e tarefas técnicas relevantes para o problema de layout no iOS. Está focada na pergunta, abordando diretamente o problema de layout ao girar o dispositivo. As informações são factualmente corretas e consistentes com a resposta esperada, incluindo a necessidade de ajuste de layout e a manutenção da funcionalidade e acessibilidade. Não há informações inventadas ou irrelevantes, e a resposta cobre todos os aspectos mencionados na pergunta do usuário.
+  Reasoning: A resposta gerada é clara e bem estruturada, com critérios de aceitação e acessibilidade organizados de forma lógica. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois os requisitos são específicos e detalhados. No entanto, a resposta poderia ser um pouco mais concisa, eliminando algumas repetições, como a menção de elementos sobrepostos e alinhamento, que já estão implícitos na adaptação correta do layout. No geral, a resposta é clara e eficaz, mas poderia ser ligeiramente mais enxuta.
+Precision: 0.90
+  Reasoning: A resposta gerada é precisa, sem alucinações, pois não contém informações inventadas e está baseada em fatos. No entanto, ela inclui critérios de acessibilidade que não foram mencionados na resposta esperada, o que pode ser considerado uma ligeira divagação. A resposta está correta em termos factuais, pois aborda a adaptação do layout ao modo paisagem, alinhamento e visibilidade dos elementos, que são consistentes com a referência. A média dos critérios resulta em um score de 0.9 devido à inclusão de informações adicionais não solicitadas.
 
 ================================================================================
 EXEMPLO 14
@@ -1590,46 +1394,14 @@ BUG REPORT:
 Campo de email aceita texto sem @, permitindo cadastros inválidos.
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um usuário se cadastrando no sistema, eu quero que o campo de email valide corretamente o formato do endereço, para que eu possa garantir que meu email está correto e receber comunicações importantes.
 
-Como um usuário que está se cadastrando no sistema, eu quero ser alertado quando inserir um email inválido, para que eu possa corrigir o erro e garantir que meu cadastro seja aceito.
-
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- **Cenário Principal: Validação de Email no Cadastro**
-  - Dado que estou na página de cadastro
-  - Quando insiro um texto no campo de email que não contém o caractere "@"
-  - Então devo ver uma mensagem de erro indicando que o email é inválido
-  - E o formulário não deve ser enviado
-
-- **Cenário Complementar: Feedback Visual**
-  - Dado que estou na página de cadastro
-  - Quando insiro um texto inválido no campo de email
-  - Então o campo de email deve ser destacado visualmente (ex: borda vermelha)
-
-- **Cenário Complementar: Consistência entre Navegadores**
-  - Dado que estou na página de cadastro em qualquer navegador suportado
-  - Quando insiro um texto inválido no campo de email
-  - Então a validação deve funcionar de forma consistente em todos os navegadores
-
-=== CONTEXTO TÉCNICO ===
-
-- Problema identificado: O campo de email aceita texto sem o caractere "@".
-- Sugestão de solução: Implementar validação de email no frontend e backend para garantir que o formato do email seja válido antes de permitir o envio do formulário.
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-1. **Frontend:**
-   - Adicionar validação de email no JavaScript para verificar a presença do caractere "@".
-   - Exibir mensagem de erro e feedback visual quando o email for inválido.
-
-2. **Backend:**
-   - Implementar validação de email no servidor para garantir que apenas emails válidos sejam aceitos.
-   - Retornar mensagem de erro apropriada se a validação falhar.
-
-3. **Testes:**
-   - Criar testes automatizados para verificar a validação de email no frontend e backend.
-   - Testar a funcionalidade em diferentes navegadores para garantir consistência.
+Critérios de Aceitação:
+- Dado que estou preenchendo o campo de email no formulário de cadastro
+- Quando insiro um texto sem o caractere "@"
+- Então o sistema deve exibir uma mensagem de erro indicando que o email é inválido
+- E deve impedir o envio do formulário até que um email válido seja inserido
+- E a mensagem de erro deve desaparecer assim que um email válido for inserido
 
 --- REFERÊNCIA ---
 Como um usuário criando uma conta, eu quero que o sistema valide meu email corretamente, para que eu não insira um endereço inválido por engano.
@@ -1643,11 +1415,11 @@ Critérios de Aceitação:
 
 --- SCORES ---
 F1: 0.80 (Precision: 0.8, Recall: 0.8)
-  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a validação do email e a exibição de uma mensagem de erro. No entanto, inclui informações adicionais não solicitadas, como feedback visual e consistência entre navegadores, que são relevantes mas não essenciais. A resposta esperada foca na mensagem de erro e na impossibilidade de prosseguir com o cadastro, que estão presentes na resposta gerada. A precisão é penalizada por informações extras, enquanto o recall é alto devido à cobertura dos pontos principais.
+  Reasoning: A resposta gerada cobre a maioria dos pontos da resposta esperada, como a validação do email e a exibição de uma mensagem de erro. No entanto, inclui detalhes adicionais, como a mensagem de erro desaparecer, que não são mencionados na resposta esperada. A precisão é alta, pois a maioria das informações são corretas e relevantes, mas não perfeita devido à inclusão de detalhes extras. O recall é alto, pois a maioria das informações importantes da resposta esperada está presente, mas não perfeito devido à omissão de detalhes menores, como a explicação do formato correto.
 Clarity: 0.90
-  Reasoning: A resposta é bem organizada, com uma estrutura clara que separa user stories, critérios de aceitação, contexto técnico e tasks técnicas. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois a resposta detalha claramente o problema e as soluções propostas. No entanto, poderia ser um pouco mais concisa, especialmente na seção de tasks técnicas, que repete informações já mencionadas nos critérios de aceitação. No geral, a resposta é clara e eficaz, mas poderia ser ligeiramente mais enxuta para melhorar a concisão.
-Precision: 1.00
-  Reasoning: A resposta gerada é precisa e não contém alucinações, pois todas as informações são baseadas em práticas comuns de validação de email. Está focada na pergunta, abordando diretamente o problema de aceitar emails inválidos e sugerindo soluções práticas. A correção factual é alta, pois os critérios de aceitação e as tarefas técnicas sugeridas são consistentes com a resposta esperada e práticas padrão de desenvolvimento. A resposta cobre todos os aspectos necessários para resolver o problema apresentado, sem desviar do tópico ou incluir informações irrelevantes.
+  Reasoning: A resposta gerada é clara e bem estruturada, com uma organização lógica que segue o fluxo de um cenário de uso. A linguagem é simples e direta, facilitando a compreensão. Não há ambiguidades, pois os critérios de aceitação são específicos e detalhados. No entanto, a resposta poderia ser ligeiramente mais concisa, eliminando algumas repetições, como a menção de que o sistema deve exibir uma mensagem de erro e impedir o envio do formulário. No geral, a resposta é clara e eficaz, mas poderia ser um pouco mais enxuta.
+Precision: 0.90
+  Reasoning: A resposta gerada é precisa e não contém alucinações, pois descreve corretamente a necessidade de validação de email e os critérios de aceitação. Está focada na questão de validar emails, sem divagar. No entanto, há uma pequena diferença em relação à resposta esperada: a resposta gerada não menciona que a mensagem de erro deve explicar o formato correto do email. Isso afeta levemente a correção factual, mas não compromete a precisão geral da resposta.
 
 ================================================================================
 EXEMPLO 15
@@ -1657,39 +1429,14 @@ BUG REPORT:
 Botão de adicionar ao carrinho não funciona no produto ID 1234.
 
 --- GERADO ---
-=== USER STORY PRINCIPAL ===
+Como um cliente navegando na loja, eu quero adicionar produtos ao meu carrinho de compras, para que eu possa continuar comprando e finalizar minha compra depois.
 
-Como um cliente navegando na loja, eu quero adicionar o produto com ID 1234 ao meu carrinho, para que eu possa continuar comprando e finalizar a compra desse item específico.
-
-=== CRITÉRIOS DE ACEITAÇÃO ===
-
-- **Cenário Principal:**
-  - Dado que estou visualizando a página do produto com ID 1234
-  - Quando clico no botão "Adicionar ao Carrinho"
-  - Então o produto deve ser adicionado ao meu carrinho
-  - E uma mensagem de confirmação deve ser exibida
-  - E o ícone do carrinho deve refletir o novo número de itens
-
-- **Cenário Complementar: Feedback Visual:**
-  - Dado que estou na página do produto com ID 1234
-  - Quando clico no botão "Adicionar ao Carrinho"
-  - Então o botão deve mostrar um feedback visual (ex: mudança de cor ou animação) para indicar que a ação foi registrada
-
-- **Cenário Complementar: Persistência:**
-  - Dado que adicionei o produto com ID 1234 ao carrinho
-  - Quando navego para outra página e retorno ao carrinho
-  - Então o produto deve ainda estar presente no carrinho
-
-=== CONTEXTO DO BUG ===
-
-- O botão "Adicionar ao Carrinho" não está funcionando especificamente para o produto com ID 1234. Outros produtos não apresentam esse problema.
-
-=== TASKS TÉCNICAS SUGERIDAS ===
-
-1. Verificar se há erros de JavaScript no console ao tentar adicionar o produto com ID 1234.
-2. Conferir se há alguma regra de validação ou condição específica no backend que impede a adição do produto 1234 ao carrinho.
-3. Revisar logs do servidor para identificar possíveis erros ou exceções ao processar a requisição de adição ao carrinho para o produto 1234.
-4. Testar a funcionalidade em diferentes navegadores para garantir que o problema não seja específico de um ambiente.
+Critérios de Aceitação:
+- Dado que estou visualizando um produto
+- Quando clico no botão "Adicionar ao Carrinho"
+- Então o produto deve ser adicionado ao carrinho
+- E devo ver uma confirmação visual
+- E o contador do carrinho deve ser atualizado
 
 --- REFERÊNCIA ---
 Como um cliente navegando na loja, eu quero adicionar produtos ao meu carrinho de compras, para que eu possa continuar comprando e finalizar minha compra depois.
@@ -1702,10 +1449,10 @@ Critérios de Aceitação:
 - E o contador do carrinho deve ser atualizado
 
 --- SCORES ---
-F1: 0.75 (Precision: 0.7, Recall: 0.8)
-  Reasoning: A resposta gerada inclui informações corretas e relevantes, como a adição do produto ao carrinho e a confirmação visual. No entanto, adiciona cenários complementares e tarefas técnicas que não são parte da resposta esperada, reduzindo a precisão. A maioria dos critérios de aceitação esperados está presente, mas a resposta gerada é mais detalhada e específica para o produto ID 1234, o que não era necessário, resultando em um recall ligeiramente menor.
-Clarity: 0.85
-  Reasoning: A resposta é bem organizada, com seções claras para user story, critérios de aceitação, contexto do bug e tasks técnicas, o que facilita a compreensão (Organização: 1.0). A linguagem é clara e direta, mas poderia ser simplificada em algumas partes (Linguagem: 0.8). Não há ambiguidades significativas, mas a inclusão de cenários complementares pode gerar dúvidas sobre sua relevância (Ausência de Ambiguidade: 0.8). A resposta é detalhada, mas poderia ser mais concisa, especialmente na descrição dos cenários complementares (Concisão: 0.8).
-Precision: 0.80
-  Reasoning: A resposta gerada é precisa em termos de identificar o problema com o botão 'Adicionar ao Carrinho' para o produto ID 1234 e sugere passos técnicos relevantes para resolução. No entanto, há uma leve alucinação ao detalhar cenários específicos que não foram mencionados na pergunta original, como feedback visual e persistência. A resposta está focada na questão, mas inclui informações adicionais não solicitadas. Comparada à resposta esperada, a gerada é mais detalhada, mas não incorreta. Portanto, a precisão é alta, mas não perfeita devido à inclusão de detalhes extras.
+F1: 1.00 (Precision: 1.0, Recall: 1.0)
+  Reasoning: A resposta gerada pelo modelo é idêntica à resposta esperada. Todas as informações são corretas e relevantes, e não há informações incorretas ou desnecessárias. Além disso, todos os critérios de aceitação da resposta esperada estão presentes na resposta gerada. Portanto, tanto a precisão quanto o recall são 1.0, pois a resposta gerada atende completamente às expectativas sem omissões ou erros.
+Clarity: 1.00
+  Reasoning: A resposta gerada é clara e atende a todos os critérios de avaliação. A organização é lógica, com uma estrutura bem definida que segue um formato de história de usuário e critérios de aceitação. A linguagem é simples e direta, sem jargões desnecessários, tornando-a fácil de entender. Não há ambiguidades, pois a resposta descreve claramente o que deve acontecer quando o botão 'Adicionar ao Carrinho' é clicado. Além disso, a resposta é concisa, fornecendo apenas as informações necessárias sem redundâncias. Portanto, a resposta merece a pontuação máxima em clareza.
+Precision: 0.67
+  Reasoning: A resposta gerada não contém alucinações, pois é uma descrição padrão de um fluxo de usuário para adicionar um produto ao carrinho, resultando em uma pontuação de 1.0 para ausência de alucinações. No entanto, a resposta não está focada na pergunta específica sobre o problema técnico do botão, resultando em uma pontuação de 0.5 para foco na pergunta. A correção factual é alta, pois a resposta corresponde à referência, mas não aborda o problema técnico, resultando em uma pontuação de 0.5. A média dos critérios é 0.67.
 

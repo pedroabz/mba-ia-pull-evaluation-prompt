@@ -342,33 +342,93 @@ python src/evaluate.py
 
 #### i. Few-shot Learning
 
-Foram definidos três exemplos com entrada e saída esperada:
+Foram definidos cinco exemplos com entrada e saída esperada, extraídos do dataset de avaliação, cobrindo os três níveis de complexidade:
 
-- O primeiro exemplo foi um caso mais vago onde algumas informações era faltantes. A resposta é esperada com suposições geradas pelo agente (enrichment) mas deve manter claro o que são suposições do agente e o que foi relatado no bug recebido.
-- O segundo exemplo foi um relato mais detalhado mas sem entrar em detalhes técnicos. A saída esperada é uma user story bem descrita e sem suposições extras sendo geradas.
-- O terceiro exemplo é um caso em que o relator do bug já fornece algum detalhes técnico sobre o erro. Além de uma resposta contendo os aspectos do segundo exemplo, deve-se ainda ter na user story uma seção com os detalhes técnicos fornecidos.
+- **Exemplo 1 (simples):** Bug de botão de carrinho não funciona. Resposta curta: user story + critérios Dado/Quando/Então, sem seções extras.
+- **Exemplo 2 (médio — performance):** Relatório de vendas lento com query sem índice. Resposta inclui Contexto Técnico com sugestão de solução e valores numéricos inferidos (ex: "menos de 30 segundos").
+- **Exemplo 3 (simples):** Dashboard mostra contagem errada de usuários ativos. Resposta curta e concisa, reforçando o padrão de que bugs simples não devem ter seções extras.
+- **Exemplo 4 (médio — UI/UX):** Modal atrás do menu lateral em telas pequenas. Resposta inclui Critérios de Acessibilidade (foco de teclado, ESC, backdrop) e Contexto Técnico com z-index.
+- **Exemplo 5 (complexo):** Sistema de checkout com múltiplas falhas (XSS, timeout de pagamento, race condition em cupons, loading infinito). Resposta usa seções === (USER STORY PRINCIPAL, CRITÉRIOS DE ACEITAÇÃO agrupados por tema, CRITÉRIOS TÉCNICOS, CONTEXTO DO BUG, TASKS TÉCNICAS SUGERIDAS).
 
-**Justificativa para o uso:** Ao se fornecer exemplos com a saída esperada, ajuda a se garantir (na medida do possível em um sistema não determinístico) um padrão de saída para os prompts que serão recebidos. Caso contrário, a IA seria mais "criativa" e geraria cada resposta de forma livre.
+A abordagem de usar exemplos literais do dataset como few-shot foi a que produziu os melhores resultados. Inicialmente foram usados exemplos inventados, mas estes não calibravam o modelo para o nível de detalhe esperado nas respostas de referência. Nas primeiras iterações com exemplo complexo inventado, o modelo aplicava o formato complexo em bugs simples e médios, adicionando seções desnecessárias. A solução foi usar o exemplo complexo diretamente do dataset, o que calibra o modelo sem causar esse efeito.
+
+**Justificativa para o uso:** Ao fornecer exemplos literais do dataset com a saída esperada, o modelo aprende de forma muito mais direta qual é o nível de detalhe esperado, quando incluir contexto técnico, quando inferir valores numéricos plausíveis e quando incluir critérios complementares como acessibilidade. Isso é mais eficaz do que regras escritas, pois o modelo generaliza a partir dos padrões dos exemplos.
 
 #### ii. Chain of Thought (CoT)
 
-Decomposição do problema em partes menores e expansão de cada uma. Tal como descrito na descrição da task, isso ajuda a expandir o problema e ajuda a garantir que cada detalhe seja considerado e avaliado. A seguinte etapa do prompt faz isso:
+Decomposição do problema em passos sequenciais que guiam o modelo na análise do bug:
 
 ```
-Ao receber o relato de bug, siga estes passos:
-1. Identifique o papel do usuário afetado
-2. Entenda qual funcionalidade está falhando e qual o comportamento esperado
-3. Analise o impacto do bug na experiência do usuário
-4. Formule a user story, o problema e os critérios de aceitação seguindo o formato acima
+1. Identifique o papel específico do usuário afetado (ex: "cliente usando Safari", não apenas "usuário")
+2. Formule o benefício como algo que o usuário consegue FAZER (ex: "avaliar os itens antes de comprar")
+3. Para bugs simples, seja conciso. Para bugs com detalhes técnicos, adicione seções contextuais.
+   Para bugs complexos, use seções === detalhadas
 ```
 
 **Justificativa para o uso:** Faz com que a IA siga um passo-a-passo que foi validado e que sabemos fazer sentido no contexto em que estamos trabalhando. Isso gera mais previsibilidade e também ajuda a assegurar um nível de qualidade superior.
 
 #### iii. Role Prompting
 
-O prompt faz com o agente assuma ser um Product owner experiente em criar user stories completas e bem descritas.
+O prompt faz com que o agente assuma ser um Product Owner experiente em criar user stories completas e bem descritas.
 ```
-Você é um Product Owner experiente, especializado em traduzir relatos de bugs de usuários em user stories claras e acionáveis para equipes de desenvolvimento.
+Você é um Product Owner experiente, especializado em traduzir relatos de bugs em user stories claras e acionáveis.
 ```
 
 **Justificativa para o uso:** Faz com que o modelo pense na perspectiva de alguém com uma certa especialidade e metodologia de trabalho. Um dev junior teria uma forma de analisar um problema totalmente diferente de um arquiteto que por sua vez também pensa diferente de um P.O., orientado a trabalhar com a visão de negócio e do ponto de vista do impacto no usuário.
+
+### B) Resultados Finais
+
+Link público do prompt no LangSmith: https://smith.langchain.com/hub/pedroabz/bug_to_user_story_v2
+
+#### Screenshots
+
+- Avaliação do prompt otimizado (v2): `assets/results_prompt_v2.png`
+- Avaliação do prompt original (v1): `assets/result_v1_referencia.png`
+
+#### Tabela comparativa: v1 (original) vs v2 (otimizado)
+
+| Métrica | v1 (original) | v2 (otimizado) | Melhoria |
+|---------|:---:|:---:|:---:|
+| **Helpfulness** | 0.84 | 0.92 | +9.5% |
+| **Correctness** | 0.78 | 0.90 | +15.4% |
+| **F1-Score** | 0.73 | 0.90 | +23.3% |
+| **Clarity** | 0.85 | 0.93 | +5.3% |
+| **Precision** | 0.82 | 0.91 | +11.0% |
+| **Média Geral** | 0.8025 | 0.9122 | +13.7% |
+| **Status** | REPROVADO | APROVADO | -- |
+
+### C) Como Executar
+
+#### Pré-requisitos
+
+- Python 3.13 (ou 3.9+, exceto 3.14)
+- Conta no [LangSmith](https://smith.langchain.com/) com API Key
+- Conta na [OpenAI](https://platform.openai.com/) com API Key
+
+#### Instalação e execução
+
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/pedroabz/mba-ia-pull-evaluation-prompt.git
+cd mba-ia-pull-evaluation-prompt
+
+# 2. Criar e ativar ambiente virtual
+python3.13 -m venv venv
+source venv/bin/activate
+
+# 3. Instalar dependências
+pip install -r requirements.txt
+
+# 4. Configurar variáveis de ambiente
+cp .env.example .env
+# Editar o .env com suas chaves:
+#   LANGSMITH_API_KEY=sua_chave
+#   USERNAME_LANGSMITH_HUB=pedroabz
+#   OPENAI_API_KEY=sua_chave
+
+# 5. Executar a avaliação
+cd src
+python evaluate.py
+```
+
+O script puxa o prompt otimizado `pedroabz/bug_to_user_story_v2` diretamente do LangSmith Hub, executa contra os 15 exemplos do dataset usando `gpt-4o-mini`, calcula as 5 métricas usando `gpt-4o` como juiz e exibe os resultados no terminal.
