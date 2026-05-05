@@ -382,7 +382,7 @@ Link público do prompt no LangSmith: https://smith.langchain.com/hub/pedroabz/b
 
 #### Screenshots
 
-- Avaliação do prompt otimizado (v2): `assets/results_prompt_v2.png`
+- Avaliação do prompt otimizado (v2): `assets/result_prompt_v2_langsmith.png`
 - Avaliação do prompt original (v1): `assets/result_v1_referencia.png`
 
 #### Tabela comparativa: v1 (original) vs v2 (otimizado)
@@ -390,11 +390,11 @@ Link público do prompt no LangSmith: https://smith.langchain.com/hub/pedroabz/b
 | Métrica | v1 (original) | v2 (otimizado) | Melhoria |
 |---------|:---:|:---:|:---:|
 | **Helpfulness** | 0.84 | 0.92 | +9.5% |
-| **Correctness** | 0.78 | 0.90 | +15.4% |
+| **Correctness** | 0.78 | 0.91 | +16.7% |
 | **F1-Score** | 0.73 | 0.90 | +23.3% |
-| **Clarity** | 0.85 | 0.93 | +5.3% |
+| **Clarity** | 0.85 | 0.92 | +8.2% |
 | **Precision** | 0.82 | 0.91 | +11.0% |
-| **Média Geral** | 0.8025 | 0.9122 | +13.7% |
+| **Média Geral** | 0.8025 | 0.9112 | +13.5% |
 | **Status** | REPROVADO | APROVADO | -- |
 
 ### C) Como Executar
