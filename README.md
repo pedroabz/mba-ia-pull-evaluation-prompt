@@ -389,8 +389,6 @@ Link público do prompt no LangSmith: https://smith.langchain.com/hub/pedroabz/b
 
 | Métrica | v1 (original) | v2 (otimizado) | Melhoria |
 |---------|:---:|:---:|:---:|
-| **Helpfulness** | 0.84 | 0.92 | +9.5% |
-| **Correctness** | 0.78 | 0.91 | +16.7% |
 | **F1-Score** | 0.73 | 0.90 | +23.3% |
 | **Clarity** | 0.85 | 0.92 | +8.2% |
 | **Precision** | 0.82 | 0.91 | +11.0% |
